@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm create:*)",
+      "Read(C:\\c\\Users\\terai\\develop\\my-ai-diary\\client/**)",
+      "Read(C:\\c\\Users\\terai\\develop\\my-ai-diary\\server/**)",
+      "Read(C:\\c\\Users\\terai\\develop\\my-ai-diary\\server/**)",
+      "Bash(npm install)",
+      "Read(C:\\c\\Users\\terai\\develop\\my-ai-diary/**)",
+      "Bash(cat:*)",
+      "Bash(npm run dev:*)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

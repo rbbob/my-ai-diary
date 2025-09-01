@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  
+  body {
+    @apply font-sans text-gray-900 bg-white;
+  }
+  
+  html, body, #root {
+    @apply h-full;
+  }
+
+  /* カスタムブレークポイント */
+  @screen xs {
+    .xs\:block {
+      display: block;
+    }
+  }
+}
+
+@layer components {
+  /* チャットバブル用のカスタムスタイル */
+  .message-bubble {
+    @apply px-4 py-2 rounded-2xl max-w-xs break-words;
+  }
+  
+  .message-bubble-user {
+    @apply bg-blue-500 text-white ml-auto;
+  }
+  
+  .message-bubble-ai {
+    @apply bg-gray-100 text-gray-900 mr-auto;
+  }
+}
