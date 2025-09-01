@@ -11,6 +11,10 @@
       "Bash(cat:*)",
       "Bash(npm run dev:*)",
       "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
       "Read(C:\\c\\Users\\terai\\my-project/**)"
     ],
     "deny": [],

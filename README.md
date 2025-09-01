@@ -62,7 +62,7 @@ npm install
 
 ### 3. 環境設定
 
-**server/.env** を作成：
+**server/.env** を作成（`.env.example`をコピー）：
 ```bash
 # Server Configuration
 PORT=3002
@@ -184,7 +184,24 @@ daily-companion/
 - ✅ **Phase 2**: UI/UX実装  
 - ✅ **Phase 3**: データ永続化
 - ✅ **Phase 4**: OpenAI API連携
-- 🎯 **Phase 5**: 本格運用・拡張機能
+- ✅ **Phase 5**: プロダクション準備・デプロイ構成
+
+## 🐳 Docker デプロイ
+
+本アプリケーションはDockerを使用して簡単にデプロイできます：
+
+```bash
+# 本番環境設定
+cp server/.env.example server/.env.production
+# .env.production を編集してOpenAI API キーなどを設定
+
+# Docker Compose でデプロイ
+docker-compose up -d
+```
+
+アクセス先：
+- フロントエンド: `http://localhost:3000`
+- API: `http://localhost:3002`
 
 ## 🤝 コントリビューション
 
