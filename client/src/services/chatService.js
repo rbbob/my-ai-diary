@@ -1,12 +1,13 @@
 import axios from 'axios';
+import { API_CONFIG, getApiUrl } from '../config/apiConfig.js';
 
 // APIベースURL
-const API_BASE = '/api';
+const API_BASE = API_CONFIG.BASE_URL;
 
 // Axiosインスタンス設定
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json'
   }
