@@ -2,12 +2,15 @@ services:
   - type: web
     name: daily-companion-api
     env: node
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
     plan: free
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "10000"
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL

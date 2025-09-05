@@ -11,7 +11,7 @@ import configRoutes from './routes/config.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 
 const limiter = rateLimit({
   windowMs: (process.env.RATE_LIMIT_WINDOW || 15) * 60 * 1000,
@@ -20,7 +20,12 @@ const limiter = rateLimit({
 });
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://my-ai-diary-8atzxq24t-terais-projects-a76f52fb.vercel.app', 'https://*.vercel.app']
+    : true,
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(limiter);
 
