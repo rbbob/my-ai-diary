@@ -18,6 +18,11 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Error:', error);
     
+    // ネットワークエラーの場合（サーバーが応答しない）
+    if (!error.response) {
+      throw new Error('サーバーに接続できません。現在APIサーバーがデプロイされていないため、チャット機能と日記生成機能は利用できません。');
+    }
+    
     if (error.response?.status === 429) {
       throw new Error('APIリクエストが多すぎます。しばらく待ってから再試行してください。');
     } else if (error.response?.status >= 500) {
