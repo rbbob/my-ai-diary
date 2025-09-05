@@ -2,9 +2,8 @@ const isProduction = import.meta.env.MODE === 'production';
 
 export const API_CONFIG = {
   // バックエンドAPIのベースURL
-  BASE_URL: isProduction 
-    ? 'https://daily-companion-api.onrender.com/api'
-    : '/api',
+  // 一時的にローカルプロキシを使用してエラーを回避
+  BASE_URL: '/api',
   
   // タイムアウト設定（ミリ秒）
   TIMEOUT: 30000,
