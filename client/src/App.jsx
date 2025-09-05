@@ -20,6 +20,7 @@ export const ToastContext = createContext(null);
 function App() {
   const [currentView, setCurrentView] = useState('chat');
   const { toasts, toast, removeToast } = useToast();
+  const [appError, setAppError] = useState(null);
 
   // リマインダーシステムの初期化
   useEffect(() => {
