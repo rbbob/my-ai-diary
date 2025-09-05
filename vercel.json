@@ -1,11 +1,26 @@
 {
-  "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/dist",
-  "installCommand": "cd client && npm install",
-  "rewrites": [
+  "functions": {
+    "client/**": {
+      "includeFiles": "client/**"
+    }
+  },
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://daily-companion-api.onrender.com/api/$1"
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://daily-companion-api.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "client/dist/$1"
     }
   ]
 }
