@@ -6,17 +6,40 @@ const router = express.Router();
 // 日記生成
 router.post('/generate', async (req, res) => {
   try {
-    const { messages = [], userSettings = {}, date } = req.body;
+    const { messages = [], userSettings = {}, date, generateTimestamp } = req.body;
+    
+    console.log('=== DIARY GENERATION REQUEST ===');
+    console.log('Generate timestamp:', generateTimestamp);
+    console.log('Date:', date);
+    console.log('Messages count:', messages.length);
+    console.log('================================');
 
+    // 入力検証
     if (!messages.length) {
       return res.status(400).json({
         success: false,
-        error: 'Messages are required for diary generation'
+        error: '日記を生成するためのチャット履歴がありません'
+      });
+    }
+
+    // メッセージ数の制限（パフォーマンス対策）
+    if (messages.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'チャット履歴が多すぎます。最新の100件以内にしてください'
+      });
+    }
+
+    // 日付の検証
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({
+        success: false,
+        error: '正しい日付形式で入力してください（YYYY-MM-DD）'
       });
     }
 
     // 日記生成
-    const diaryData = await generateDiaryEntry(messages, userSettings);
+    const diaryData = await generateDiaryEntry(messages, userSettings, date);
 
     // 日記エントリーオブジェクトを作成
     const diaryEntry = {

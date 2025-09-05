@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import chatRoutes from './routes/chat.js';
 import diaryRoutes from './routes/diary.js';
+import profileRoutes from './routes/profile.js';
+import configRoutes from './routes/config.js';
 
 dotenv.config();
 
@@ -25,6 +27,8 @@ app.use(limiter);
 // API Routes
 app.use('/api/chat', chatRoutes);
 app.use('/api/diary', diaryRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/config', configRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

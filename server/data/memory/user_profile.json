@@ -1,0 +1,31 @@
+{
+  "personality": {
+    "traits": [
+      "ポジティブ"
+    ],
+    "interests": [
+      "仕事",
+      "運動",
+      "読書",
+      "学習",
+      "音楽"
+    ],
+    "communicationStyle": "unknown",
+    "emotionalTendency": "neutral"
+  },
+  "writingStyle": {
+    "tone": "emotional",
+    "length": "short",
+    "structure": "narrative"
+  },
+  "preferences": {
+    "topicsFocus": [],
+    "timeReflection": "evening",
+    "moodTracking": true
+  },
+  "learningData": {
+    "conversationCount": 41,
+    "lastUpdated": "2025-09-05T00:05:50.265Z",
+    "memoryVersion": "1.0"
+  }
+}

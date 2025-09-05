@@ -1,5 +1,5 @@
 import React from 'react';
-import { BsChatDots, BsJournalText, BsGear } from 'react-icons/bs';
+import { BsChatDots, BsJournalText, BsGear, BsSearch, BsBarChart, BsDownload } from 'react-icons/bs';
 
 const TabNavigation = ({ currentView, onViewChange }) => {
   const navItems = [
@@ -18,6 +18,27 @@ const TabNavigation = ({ currentView, onViewChange }) => {
       inactiveColor: 'text-gray-500 border-transparent hover:text-gray-700'
     },
     {
+      id: 'search',
+      label: '検索',
+      icon: BsSearch,
+      activeColor: 'text-green-600 border-green-600',
+      inactiveColor: 'text-gray-500 border-transparent hover:text-gray-700'
+    },
+    {
+      id: 'stats',
+      label: '統計',
+      icon: BsBarChart,
+      activeColor: 'text-orange-600 border-orange-600',
+      inactiveColor: 'text-gray-500 border-transparent hover:text-gray-700'
+    },
+    {
+      id: 'export',
+      label: 'エクスポート',
+      icon: BsDownload,
+      activeColor: 'text-indigo-600 border-indigo-600',
+      inactiveColor: 'text-gray-500 border-transparent hover:text-gray-700'
+    },
+    {
       id: 'settings',
       label: '設定',
       icon: BsGear,
@@ -27,7 +48,7 @@ const TabNavigation = ({ currentView, onViewChange }) => {
   ];
 
   return (
-    <nav className="hidden md:block border-b border-gray-200 bg-white">
+    <nav className="hidden md:block border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex space-x-8">
           {navItems.map((item) => {

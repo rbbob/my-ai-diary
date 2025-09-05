@@ -15,7 +15,10 @@
       "Read(C:\\c\\Users\\terai\\my-project/**)",
       "Read(C:\\c\\Users\\terai\\my-project/**)",
       "Read(C:\\c\\Users\\terai\\my-project/**)",
-      "Read(C:\\c\\Users\\terai\\my-project/**)"
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "Read(C:\\c\\Users\\terai\\my-project/**)",
+      "WebSearch",
+      "WebFetch(domain:www.personal.ai)"
     ],
     "deny": [],
     "ask": []

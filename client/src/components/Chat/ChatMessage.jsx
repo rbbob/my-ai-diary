@@ -23,7 +23,7 @@ const ChatMessage = ({ message }) => {
       <div className="flex-shrink-0">
         {isUser ? (
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">あ</span>
+            <span className="text-white text-sm font-medium">ボブ</span>
           </div>
         ) : (
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
@@ -38,7 +38,7 @@ const ChatMessage = ({ message }) => {
           className={`px-4 py-3 rounded-2xl break-words ${
             isUser
               ? 'bg-blue-500 text-white rounded-br-sm'
-              : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-sm'
           }`}
         >
           {/* メッセージを改行で分割して表示 */}
@@ -51,7 +51,7 @@ const ChatMessage = ({ message }) => {
         </div>
         
         {/* Timestamp */}
-        <span className="text-xs text-gray-500 mt-1 px-1">
+        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
           {formattedTime}
         </span>
       </div>

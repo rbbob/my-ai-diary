@@ -8,10 +8,26 @@ router.post('/message', async (req, res) => {
   try {
     const { message, messages = [], userSettings = {} } = req.body;
 
+    // 入力検証
     if (!message || !message.trim()) {
       return res.status(400).json({
         success: false,
-        error: 'Message is required'
+        error: 'メッセージを入力してください'
+      });
+    }
+
+    if (message.length > 1000) {
+      return res.status(400).json({
+        success: false,
+        error: 'メッセージは1000文字以内で入力してください'
+      });
+    }
+
+    // スパム防止：同じ文字の連続チェック
+    if (/(.)\1{10,}/.test(message)) {
+      return res.status(400).json({
+        success: false,
+        error: '不適切な内容が含まれている可能性があります'
       });
     }
 

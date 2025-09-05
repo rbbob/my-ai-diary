@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   MESSAGES: 'daily_companion_messages',
   DIARY_ENTRIES: 'daily_companion_diary_entries', 
   USER_SETTINGS: 'daily_companion_user_settings',
-  APP_DATA: 'daily_companion_app_data'
+  APP_DATA: 'daily_companion_app_data',
+  REMINDER_SETTINGS: 'daily_companion_reminder_settings'
 };
 
 // 基本的なLocalStorage操作
@@ -71,7 +72,12 @@ export const messageStorage = {
   // メッセージ追加
   addMessage: (message) => {
     const messages = messageStorage.getMessages();
-    const newMessages = [...messages, message];
+    // タイムスタンプを自動追加（日記生成で日付フィルタリングに使用）
+    const messageWithTimestamp = {
+      ...message,
+      timestamp: message.timestamp || new Date().toISOString()
+    };
+    const newMessages = [...messages, messageWithTimestamp];
     return messageStorage.saveMessages(newMessages);
   },
 
@@ -263,6 +269,80 @@ export const dataPortability = {
   }
 };
 
+// リマインダー設定管理
+export const reminderStorage = {
+  // デフォルト設定
+  defaultSettings: {
+    enabled: false,
+    dailyReminder: {
+      enabled: false,
+      hour: 20,
+      minute: 0
+    },
+    streakNotifications: true,
+    encouragementNotifications: true,
+    weeklyReview: {
+      enabled: false,
+      dayOfWeek: 0, // 0 = Sunday, 1 = Monday, etc.
+      hour: 19,
+      minute: 0
+    }
+  },
+
+  // リマインダー設定取得
+  getReminderSettings: () => {
+    const settings = storage.get(STORAGE_KEYS.REMINDER_SETTINGS);
+    if (!settings) {
+      reminderStorage.saveReminderSettings(reminderStorage.defaultSettings);
+      return reminderStorage.defaultSettings;
+    }
+    return { ...reminderStorage.defaultSettings, ...settings };
+  },
+
+  // リマインダー設定保存
+  saveReminderSettings: (settings) => {
+    return storage.set(STORAGE_KEYS.REMINDER_SETTINGS, settings);
+  },
+
+  // 個別設定更新
+  updateReminderSetting: (key, value) => {
+    const settings = reminderStorage.getReminderSettings();
+    const updatedSettings = { ...settings, [key]: value };
+    return reminderStorage.saveReminderSettings(updatedSettings);
+  },
+
+  // 日次リマインダー時刻更新
+  updateDailyReminderTime: (hour, minute) => {
+    const settings = reminderStorage.getReminderSettings();
+    settings.dailyReminder = {
+      ...settings.dailyReminder,
+      hour,
+      minute
+    };
+    return reminderStorage.saveReminderSettings(settings);
+  },
+
+  // 日次リマインダー有効/無効
+  enableDailyReminder: (enabled) => {
+    const settings = reminderStorage.getReminderSettings();
+    settings.dailyReminder.enabled = enabled;
+    settings.enabled = enabled || settings.weeklyReview.enabled;
+    return reminderStorage.saveReminderSettings(settings);
+  },
+
+  // 週次レビュー設定更新
+  updateWeeklyReview: (dayOfWeek, hour, minute) => {
+    const settings = reminderStorage.getReminderSettings();
+    settings.weeklyReview = {
+      ...settings.weeklyReview,
+      dayOfWeek,
+      hour,
+      minute
+    };
+    return reminderStorage.saveReminderSettings(settings);
+  }
+};
+
 export default {
   storage,
   messageStorage,
@@ -270,5 +350,6 @@ export default {
   settingsStorage,
   appDataStorage,
   dataPortability,
+  reminderStorage,
   STORAGE_KEYS
 };

@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { BsSend, BsPlusCircle, BsEmojiSmile } from 'react-icons/bs';
+import { validateMessage } from '../../utils/validation';
+import { ToastContext } from '../../App';
 
 const ChatInput = ({ onSendMessage, disabled = false }) => {
   const [message, setMessage] = useState('');
+  const [validationError, setValidationError] = useState(null);
+  const toast = useContext(ToastContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // 入力検証
+    const validation = validateMessage(message);
+    if (!validation.isValid) {
+      const firstError = validation.errors[0];
+      toast?.error(firstError);
+      setValidationError(firstError);
+      return;
+    }
+    
     if (message.trim() && !disabled) {
       onSendMessage(message);
       setMessage('');
+      setValidationError(null);
     }
   };
 
@@ -28,7 +43,7 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
   ];
 
   return (
-    <div className="border-t border-gray-200 bg-white px-4 py-3">
+    <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3">
       {/* 提案メッセージ（空の時のみ表示） */}
       {!message.trim() && (
         <div className="mb-3">
@@ -37,13 +52,24 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
               <button
                 key={index}
                 onClick={() => setMessage(suggestion)}
-                className="whitespace-nowrap bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-1.5 rounded-full transition-colors flex-shrink-0"
+                className="whitespace-nowrap bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm px-3 py-1.5 rounded-full transition-colors flex-shrink-0"
                 disabled={disabled}
               >
                 {suggestion}
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 文字数カウンタ */}
+      {message && (
+        <div className="flex justify-end mb-1">
+          <span className={`text-xs ${
+            message.length > 900 ? 'text-red-500' : 'text-gray-500'
+          }`}>
+            {message.length} / 1000
+          </span>
         </div>
       )}
 
@@ -62,11 +88,19 @@ const ChatInput = ({ onSendMessage, disabled = false }) => {
         <div className="flex-1 relative">
           <textarea
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              if (validationError) {
+                setValidationError(null);
+              }
+            }}
             onKeyPress={handleKeyPress}
             placeholder="メッセージを入力..."
             disabled={disabled}
-            className="w-full px-4 py-3 pr-12 bg-gray-100 border-0 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all max-h-32 min-h-[48px]"
+            maxLength={1000}
+            className={`w-full px-4 py-3 pr-12 bg-gray-100 dark:bg-gray-700 border-0 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:bg-white dark:focus:bg-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all max-h-32 min-h-[48px] ${
+              validationError ? 'focus:ring-red-500 border border-red-300' : 'focus:ring-blue-500'
+            }`}
             rows="1"
             style={{
               scrollbarWidth: 'none',

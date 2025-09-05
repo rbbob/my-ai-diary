@@ -101,8 +101,52 @@ export const healthCheck = async () => {
   }
 };
 
+// プロファイル関連のAPI
+export const profileService = {
+  // プロファイル取得
+  getProfile: async () => {
+    try {
+      const response = await api.get('/profile');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // プロファイル統計取得
+  getProfileStats: async () => {
+    try {
+      const response = await api.get('/profile/stats');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // プロファイルリセット
+  resetProfile: async () => {
+    try {
+      const response = await api.post('/profile/reset');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // 学習記憶取得
+  getMemories: async () => {
+    try {
+      const response = await api.get('/profile/memories');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
 export default {
   chatService,
   diaryService,
+  profileService,
   healthCheck
 };

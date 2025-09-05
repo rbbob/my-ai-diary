@@ -121,6 +121,17 @@ const DiaryContainer = () => {
     setSelectedEntry(null);
   };
 
+  // 日記が生成された時の処理
+  const handleDiaryGenerated = (newDiary) => {
+    // 日記リストを更新
+    const updatedDiaries = [newDiary, ...diaryEntries.filter(d => d.date !== newDiary.date)];
+    setDiaryEntries(updatedDiaries);
+    
+    // 新しく生成された日記を表示
+    setSelectedEntry(newDiary);
+    setSelectedDate(new Date(newDiary.date));
+  };
+
   return (
     <div className="h-full flex flex-col md:flex-row">
       {/* モバイル: カレンダーまたは日記詳細 */}
@@ -133,7 +144,9 @@ const DiaryContainer = () => {
         ) : (
           <DiaryEntry 
             entry={selectedEntry}
+            selectedDate={selectedDate}
             onBack={handleBackToCalendar}
+            onDiaryGenerated={handleDiaryGenerated}
           />
         )}
       </div>
@@ -149,7 +162,9 @@ const DiaryContainer = () => {
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 md:ml-4">
         <DiaryEntry 
           entry={selectedEntry}
+          selectedDate={selectedDate}
           onBack={handleBackToCalendar}
+          onDiaryGenerated={handleDiaryGenerated}
         />
       </div>
     </div>
