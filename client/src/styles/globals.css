@@ -13,6 +13,23 @@
   
   html, body, #root {
     @apply h-full;
+    /* モバイル対応の高さ調整 */
+    min-height: 100vh;
+    min-height: 100dvh; /* 動的ビューポートの高さ */
+  }
+
+  /* モバイル用の安全な設定 */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    position: relative;
+  }
+
+  /* モバイル白画面防止 */
+  #root {
+    width: 100%;
+    min-height: inherit;
+    position: relative;
   }
 
   /* カスタムブレークポイント */
