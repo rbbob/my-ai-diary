@@ -22,6 +22,16 @@ function App() {
   const { toasts, toast, removeToast } = useToast();
   const [appError, setAppError] = useState(null);
 
+  // 緊急デバッグ用のログ
+  console.log('App component rendered, currentView:', currentView);
+  console.log('App error state:', appError);
+  
+  // モバイルデバッグ用の早期リターン
+  if (typeof window !== 'undefined') {
+    console.log('Window size:', window.innerWidth, 'x', window.innerHeight);
+    console.log('User agent:', navigator.userAgent);
+  }
+
   // リマインダーシステムの初期化
   useEffect(() => {
     const initializeReminderSystem = async () => {
@@ -108,25 +118,72 @@ function App() {
     }
   };
 
-  return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <ToastContext.Provider value={toast}>
-          <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
-            <Header currentView={currentView} />
-            <TabNavigation currentView={currentView} onViewChange={setCurrentView} />
-            
-            <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 pb-20 md:pb-6 overflow-hidden">
-              {renderContent()}
-            </main>
+  // CSSを完全に無視して、DOM操作でスタイリング
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      * { box-sizing: border-box !important; }
+      html, body { margin: 0 !important; padding: 0 !important; }
+      #root { 
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background-color: #ff0000 !important;
+        color: white !important;
+        font-size: 20px !important;
+        padding: 20px !important;
+        z-index: 9999 !important;
+        overflow: auto !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
-            <BottomNavigation currentView={currentView} onViewChange={setCurrentView} />
-            
-            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-          </div>
-        </ToastContext.Provider>
-      </ThemeProvider>
-    </ErrorBoundary>
+  return (
+    <div>
+      <h1>🔴 DEBUG MODE - モバイルテスト成功！</h1>
+      <p>✅ JavaScript動作中</p>
+      <p>✅ React レンダリング成功</p>
+      <p>📱 画面サイズ: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}</p>
+      <p>🌐 User Agent: {typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 60) + '...' : 'N/A'}</p>
+      <p>📊 現在のビュー: {currentView}</p>
+      <button 
+        onClick={() => {
+          const newView = currentView === 'chat' ? 'diary' : 'chat';
+          setCurrentView(newView);
+          console.log('View changed to:', newView);
+        }}
+        style={{
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          padding: '15px 30px',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '18px',
+          marginTop: '20px',
+          cursor: 'pointer'
+        }}
+      >
+        🔄 View切替テスト (現在: {currentView})
+      </button>
+      <div style={{
+        marginTop: '20px',
+        padding: '15px',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: '8px'
+      }}>
+        <p>🎯 このテストが成功すれば:</p>
+        <p>• JavaScript/React は正常</p>
+        <p>• 問題はCSSまたはTailwind設定</p>
+        <p>• 元のアプリ復元可能</p>
+      </div>
+    </div>
   )
 }
 

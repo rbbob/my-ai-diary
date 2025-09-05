@@ -1,21 +1,25 @@
 @tailwind base;
-@tailwind components;
+@tailwind components;  
 @tailwind utilities;
 
 @layer base {
   * {
-    @apply box-border;
+    box-sizing: border-box;
   }
   
   body {
-    @apply font-sans text-gray-900 bg-white;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    color: #111827; /* text-gray-900 */
+    background-color: #ffffff; /* bg-white */
   }
   
   html, body, #root {
-    @apply h-full;
+    height: 100%; /* h-full */
     /* モバイル対応の高さ調整 */
     min-height: 100vh;
     min-height: 100dvh; /* 動的ビューポートの高さ */
+    /* 白い画面防止のための背景色設定 */
+    background-color: #f9fafb; /* bg-gray-50 */
   }
 
   /* モバイル用の安全な設定 */
@@ -30,6 +34,9 @@
     width: 100%;
     min-height: inherit;
     position: relative;
+    /* 緊急デバッグ用の表示確認 */
+    border: 2px solid red !important;
+    background-color: #fef2f2 !important; /* 赤い背景で確認 */
   }
 
   /* カスタムブレークポイント */
@@ -43,14 +50,24 @@
 @layer components {
   /* チャットバブル用のカスタムスタイル */
   .message-bubble {
-    @apply px-4 py-2 rounded-2xl max-w-xs break-words;
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem; /* px-4 */
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem; /* py-2 */
+    border-radius: 1rem; /* rounded-2xl */
+    max-width: 20rem; /* max-w-xs */
+    overflow-wrap: break-word; /* break-words */
   }
   
   .message-bubble-user {
-    @apply bg-blue-500 text-white ml-auto;
+    background-color: #3b82f6; /* bg-blue-500 */
+    color: #ffffff; /* text-white */
+    margin-left: auto; /* ml-auto */
   }
   
   .message-bubble-ai {
-    @apply bg-gray-100 text-gray-900 mr-auto;
+    background-color: #f3f4f6; /* bg-gray-100 */
+    color: #111827; /* text-gray-900 */
+    margin-right: auto; /* mr-auto */
   }
 }
