@@ -4,7 +4,7 @@ import { settingsStorage, appDataStorage, dataPortability, storage, messageStora
 import ProfileSection from './ProfileSection';
 import APIKeySection from './APIKeySection';
 import ReminderSettings from './ReminderSettings';
-import FormInput from '../common/FormInput';
+import FormInput from '../Common/FormInput';
 import { validateUsername, validateAIName } from '../../utils/validation';
 import { ToastContext } from '../../App';
 import { useTheme } from '../../contexts/ThemeContext';
