@@ -109,26 +109,86 @@ function App() {
     }
   };
 
-  return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <ToastContext.Provider value={toast}>
-          <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
-            <Header currentView={currentView} />
-            <TabNavigation currentView={currentView} onViewChange={setCurrentView} />
-            
-            <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 pb-20 md:pb-6 overflow-hidden">
-              {renderContent()}
-            </main>
+  // 段階的デバッグ：最小限のコンポーネントから開始
+  try {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#f9fafb',
+        padding: '20px',
+        fontSize: '16px',
+        color: '#111827'
+      }}>
+        <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Daily Companion - 段階的テスト</h1>
+        
+        <div style={{ marginBottom: '15px' }}>
+          <p>✅ App.jsx レンダリング成功</p>
+          <p>✅ 基本的なJavaScript動作</p>
+          <p>現在のビュー: {currentView}</p>
+        </div>
 
-            <BottomNavigation currentView={currentView} onViewChange={setCurrentView} />
-            
-            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-          </div>
-        </ToastContext.Provider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  )
+        <button 
+          onClick={() => setCurrentView(currentView === 'chat' ? 'diary' : 'chat')}
+          style={{
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            marginBottom: '20px'
+          }}
+        >
+          ビュー切替テスト ({currentView})
+        </button>
+
+        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: 'white', borderRadius: '8px' }}>
+          <h3>次のステップ:</h3>
+          <p>1. このテストが成功 → 個別コンポーネントに問題</p>
+          <p>2. このテストが失敗 → より基本的な問題</p>
+          <p>3. Errorバウンダリやインポートエラーを調査</p>
+        </div>
+
+        {/* Toast機能の基本テスト */}
+        <button 
+          onClick={() => toast({ message: 'テストメッセージ', type: 'success' })}
+          style={{
+            backgroundColor: '#10b981',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            marginTop: '10px'
+          }}
+        >
+          Toast機能テスト
+        </button>
+
+        <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '20px',
+        fontSize: '18px'
+      }}>
+        <h1>❌ App.jsx エラー発生</h1>
+        <p>エラー: {error.message}</p>
+        <p>スタック: {error.stack}</p>
+      </div>
+    );
+  }
 }
 
 export default App

@@ -2,19 +2,26 @@
 
 export class NotificationManager {
   constructor() {
-    this.permission = Notification.permission;
+    // モバイル互換性：Notification APIの存在確認
+    this.permission = (typeof Notification !== 'undefined') ? Notification.permission : 'denied';
+    this.supported = typeof Notification !== 'undefined';
   }
 
   // 通知許可を要求
   async requestPermission() {
-    if (!('Notification' in window)) {
+    if (!this.supported || !('Notification' in window)) {
       console.warn('このブラウザは通知をサポートしていません');
       return false;
     }
 
     if (this.permission === 'default') {
-      const permission = await Notification.requestPermission();
-      this.permission = permission;
+      try {
+        const permission = await Notification.requestPermission();
+        this.permission = permission;
+      } catch (error) {
+        console.warn('通知許可の取得に失敗しました:', error);
+        return false;
+      }
     }
 
     return this.permission === 'granted';
@@ -52,7 +59,7 @@ export class NotificationManager {
 
   // 通知を表示できるかチェック
   canShowNotification() {
-    return 'Notification' in window && this.permission === 'granted';
+    return this.supported && 'Notification' in window && this.permission === 'granted';
   }
 
   // 日記リマインダー通知
