@@ -1,0 +1,16 @@
+{
+  "name": "ai-diary-app",
+  "version": "1.0.0",
+  "description": "AI-powered diary application with chat and automatic diary generation",
+  "scripts": {
+    "build": "cd client && npm run build",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "start": "cd server && npm start"
+  },
+  "keywords": ["ai", "diary", "chat", "openai", "react", "nodejs"],
+  "author": "rbbob",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
