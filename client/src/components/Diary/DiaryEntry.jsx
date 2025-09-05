@@ -21,6 +21,30 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
     setCurrentEntry(entry);
   }, [entry, selectedDate]);
 
+  const getMoodEmoji = (mood) => {
+    const moodEmojis = {
+      happy: '😊',
+      excited: '🤩', 
+      neutral: '😐',
+      sad: '😢',
+      anxious: '😰',
+      peaceful: '😌'
+    };
+    return moodEmojis[mood] || '📝';
+  };
+
+  const getMoodText = (mood) => {
+    const moodTexts = {
+      happy: '幸せ',
+      excited: 'わくわく', 
+      neutral: '普通',
+      sad: '悲しい',
+      anxious: '不安',
+      peaceful: '穏やか'
+    };
+    return moodTexts[mood] || '記録';
+  };
+
   const generateDiary = async () => {
     if (isGenerating) return; // 重複実行を防止
     
@@ -312,30 +336,6 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
       </div>
     );
   }
-
-  const getMoodEmoji = (mood) => {
-    const moodEmojis = {
-      happy: '😊',
-      excited: '🤩', 
-      neutral: '😐',
-      sad: '😢',
-      anxious: '😰',
-      peaceful: '😌'
-    };
-    return moodEmojis[mood] || '📝';
-  };
-
-  const getMoodText = (mood) => {
-    const moodTexts = {
-      happy: '幸せ',
-      excited: 'わくわく', 
-      neutral: '普通',
-      sad: '悲しい',
-      anxious: '不安',
-      peaceful: '穏やか'
-    };
-    return moodTexts[mood] || '記録';
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm h-full flex flex-col">
