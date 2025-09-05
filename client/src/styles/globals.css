@@ -34,9 +34,6 @@
     width: 100%;
     min-height: inherit;
     position: relative;
-    /* 緊急デバッグ用の表示確認 */
-    border: 2px solid red !important;
-    background-color: #fef2f2 !important; /* 赤い背景で確認 */
   }
 
   /* カスタムブレークポイント */
