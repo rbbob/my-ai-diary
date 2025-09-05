@@ -3,7 +3,7 @@ const isProduction = import.meta.env.MODE === 'production';
 export const API_CONFIG = {
   // バックエンドAPIのベースURL
   BASE_URL: isProduction 
-    ? 'https://daily-companion-api.onrender.com/api' 
+    ? 'https://daily-companion-api-8j2k.onrender.com/api' 
     : '/api',
   
   // タイムアウト設定（ミリ秒）

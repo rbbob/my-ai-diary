@@ -18,14 +18,8 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
 
   // entryが更新された時に現在の表示を更新
   useEffect(() => {
-    if (entry) {
-      console.log('=== ENTRY UPDATED ===');
-      console.log('New entry title:', entry.title);
-      console.log('New entry summary length:', entry.summary?.length);
-      console.log('====================');
-      setCurrentEntry(entry);
-    }
-  }, [entry]);
+    setCurrentEntry(entry);
+  }, [entry, selectedDate]);
 
   const generateDiary = async () => {
     if (isGenerating) return; // 重複実行を防止
@@ -196,7 +190,7 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
       // LocalStorageを更新
       const existingDiaries = diaryStorage.getDiaryEntries();
       const updatedDiaries = existingDiaries.map(diary => 
-        diary.diaryId === entry.diaryId ? updatedEntry : diary
+        diary.diaryId === currentEntry?.diaryId ? updatedEntry : diary
       );
       diaryStorage.saveDiaryEntries(updatedDiaries);
 
@@ -222,7 +216,7 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
     try {
       const existingDiaries = diaryStorage.getDiaryEntries();
       const updatedDiaries = existingDiaries.filter(diary => 
-        diary.diaryId !== entry.diaryId
+        diary.diaryId !== currentEntry?.diaryId
       );
       diaryStorage.saveDiaryEntries(updatedDiaries);
 
@@ -268,15 +262,39 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
 
   if (!currentEntry) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📝</div>
-          <p className="text-lg mb-6">今日の日記を作成しませんか？</p>
+      <div className="h-full flex flex-col">
+        {/* 戻るボタン（モバイル用） */}
+        <div className="md:hidden flex items-center p-4 border-b bg-white">
           <button
-            onClick={generateDiary}
-            disabled={isGenerating}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            onClick={onBack}
+            className="flex items-center text-gray-600 hover:text-gray-800"
           >
+            <BsArrowLeft className="w-5 h-5 mr-2" />
+            カレンダーに戻る
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center flex-1 text-gray-500">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📝</div>
+            <p className="text-lg mb-2">
+              {selectedDate ? 
+                `${selectedDate.toLocaleDateString('ja-JP', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}の日記を作成しませんか？` 
+                : '今日の日記を作成しませんか？'
+              }
+            </p>
+            <p className="text-sm mb-6 text-gray-400">
+              チャットで会話した内容から自動で日記が生成されます
+            </p>
+            <button
+              onClick={generateDiary}
+              disabled={isGenerating}
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
             {isGenerating ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
@@ -289,9 +307,7 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
               </>
             )}
           </button>
-          <p className="text-sm text-gray-400 mt-2">
-            チャットでの会話から自動で日記を作成します
-          </p>
+          </div>
         </div>
       </div>
     );
@@ -454,14 +470,14 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
         </div>
 
         {/* ハイライト */}
-        {entry.highlights && entry.highlights.length > 0 && (
+        {currentEntry?.highlights && currentEntry.highlights.length > 0 && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
               <span className="mr-2">✨</span>
               今日のハイライト
             </h3>
             <ul className="space-y-2">
-              {entry.highlights.map((highlight, index) => (
+              {currentEntry.highlights.map((highlight, index) => (
                 <li key={index} className="flex items-start">
                   <span className="text-purple-500 mr-2 mt-1">•</span>
                   <span className="text-gray-700">{highlight}</span>
@@ -493,8 +509,8 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {(entry.tags && entry.tags.length > 0) ? (
-                entry.tags.map((tag, index) => (
+              {(currentEntry?.tags && currentEntry.tags.length > 0) ? (
+                currentEntry.tags.map((tag, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
@@ -520,19 +536,19 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">文字数:</span>
-              <span className="ml-2 font-medium">{entry.wordCount}文字</span>
+              <span className="ml-2 font-medium">{currentEntry?.wordCount || 0}文字</span>
             </div>
             <div>
               <span className="text-gray-500">作成日:</span>
               <span className="ml-2 font-medium">
-                {format(new Date(entry.createdAt), 'M/d HH:mm', { locale: ja })}
+                {currentEntry?.createdAt ? format(new Date(currentEntry.createdAt), 'M/d HH:mm', { locale: ja }) : '-'}
               </span>
             </div>
-            {entry.updatedAt && entry.updatedAt !== entry.createdAt && (
+            {currentEntry?.updatedAt && currentEntry.updatedAt !== currentEntry.createdAt && (
               <div className="col-span-2">
                 <span className="text-gray-500">更新日:</span>
                 <span className="ml-2 font-medium">
-                  {format(new Date(entry.updatedAt), 'M/d HH:mm', { locale: ja })}
+                  {format(new Date(currentEntry.updatedAt), 'M/d HH:mm', { locale: ja })}
                 </span>
               </div>
             )}
@@ -560,10 +576,10 @@ const DiaryEntry = ({ entry, selectedDate, onBack, onDiaryGenerated }) => {
             
             <div className="mb-4">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                「<span className="font-semibold">{entry.title}</span>」を削除してもよろしいですか？
+                「<span className="font-semibold">{currentEntry?.title || '日記'}</span>」を削除してもよろしいですか？
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {format(new Date(entry.date), 'yyyy年M月d日(E)', { locale: ja })}の日記
+                {currentEntry?.date ? format(new Date(currentEntry.date), 'yyyy年M月d日(E)', { locale: ja }) : ''}の日記
               </p>
             </div>
             

@@ -108,10 +108,8 @@ const DiaryContainer = () => {
       setViewMode('entry');
     } else {
       setSelectedEntry(null);
-      // モバイルでは日記がない場合はカレンダービューを維持
-      if (window.innerWidth >= 768) {
-        setViewMode('entry'); // デスクトップでは空の状態を表示
-      }
+      // 日記がない場合でも日記作成画面に移動
+      setViewMode('entry');
     }
   };
 
@@ -143,6 +141,7 @@ const DiaryContainer = () => {
           />
         ) : (
           <DiaryEntry 
+            key={`${selectedDate?.toISOString()}-${selectedEntry?.diaryId || 'empty'}`}
             entry={selectedEntry}
             selectedDate={selectedDate}
             onBack={handleBackToCalendar}
@@ -161,6 +160,7 @@ const DiaryContainer = () => {
       
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 md:ml-4">
         <DiaryEntry 
+          key={`${selectedDate?.toISOString()}-${selectedEntry?.diaryId || 'empty'}`}
           entry={selectedEntry}
           selectedDate={selectedDate}
           onBack={handleBackToCalendar}
