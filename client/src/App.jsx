@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ChatContainer from './components/Chat/ChatContainer';
+import DiaryContainer from './components/Diary/DiaryContainer';
 import SettingsContainer from './components/Settings/SettingsContainer';
 
 function App() {
@@ -9,6 +10,8 @@ function App() {
     switch (currentView) {
       case 'chat':
         return <ChatContainer />;
+      case 'diary':
+        return <DiaryContainer />;
       case 'settings':
         return <SettingsContainer />;
       case 'about':
@@ -42,6 +45,16 @@ function App() {
               }`}
             >
               💬 チャット
+            </button>
+            <button
+              onClick={() => setCurrentView('diary')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                currentView === 'diary'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-600 hover:text-indigo-600'
+              }`}
+            >
+              📓 日記
             </button>
             <button
               onClick={() => setCurrentView('settings')}

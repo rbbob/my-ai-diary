@@ -1,0 +1,168 @@
+import React from 'react';
+
+const DiaryList = ({ diaries, onEdit, onDelete, onCreateNew, onGenerateFromChat, isGenerating }) => {
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long'
+    });
+  };
+
+  const getMoodEmoji = (mood) => {
+    const moodMap = {
+      '最高': '😄',
+      '良い': '😊',
+      'まあまあ': '😐',
+      '悪い': '😞',
+      '最悪': '😢'
+    };
+    return moodMap[mood] || '😐';
+  };
+
+  const getWeatherEmoji = (weather) => {
+    if (!weather) return null;
+    const weatherMap = {
+      '晴れ': '☀️',
+      '曇り': '☁️',
+      '雨': '🌧️',
+      '雪': '❄️',
+      '台風': '🌪️'
+    };
+    return weatherMap[weather] || '🌤️';
+  };
+
+  const truncateContent = (content, maxLength = 150) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
+  if (diaries.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <div className="text-6xl mb-4">📝</div>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+          まだ日記がありません
+        </h3>
+        <p className="text-gray-500 mb-6">
+          新しい日記を作成するか、チャット履歴から自動生成してみましょう！
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={onCreateNew}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            ✏️ 新しい日記を書く
+          </button>
+          <button
+            onClick={onGenerateFromChat}
+            disabled={isGenerating}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-colors"
+          >
+            {isGenerating ? '🔄 生成中...' : '🤖 AI日記を生成'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            📚 日記一覧 ({diaries.length}件)
+          </h3>
+          <p className="text-sm text-gray-500">
+            クリックして詳細を確認・編集できます
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {diaries.map((diary) => (
+          <div
+            key={diary.id}
+            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
+            onClick={() => onEdit(diary)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h4 className="text-lg font-medium text-gray-800">
+                    {diary.title || '無題の日記'}
+                  </h4>
+                  {diary.generated && (
+                    <span className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                      🤖 AI生成
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600">
+                  <span>📅 {formatDate(diary.date)}</span>
+                  <span>{getMoodEmoji(diary.mood)} {diary.mood}</span>
+                  {diary.weather && (
+                    <span>{getWeatherEmoji(diary.weather)} {diary.weather}</span>
+                  )}
+                </div>
+                
+                <p className="text-gray-700 leading-relaxed">
+                  {truncateContent(diary.content)}
+                </p>
+                
+                {diary.tags && diary.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {diary.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex space-x-2 ml-4">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(diary);
+                  }}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  title="編集"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(diary.id);
+                  }}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  title="削除"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {diaries.length > 5 && (
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            全 {diaries.length} 件の日記があります
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DiaryList;

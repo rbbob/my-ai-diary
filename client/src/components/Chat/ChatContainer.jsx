@@ -13,6 +13,7 @@ const ChatContainer = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingDiary, setIsGeneratingDiary] = useState(false);
   const messagesEndRef = useRef(null);
 
   // メッセージリストを最下部にスクロール
@@ -85,19 +86,106 @@ const ChatContainer = () => {
     }
   };
 
+  // 日記生成機能
+  const generateDiaryFromChat = async () => {
+    setIsGeneratingDiary(true);
+    
+    try {
+      // 日記生成API呼び出し
+      const response = await fetch('/api/diary/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages,
+          date: new Date().toISOString().split('T')[0]
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('日記生成に失敗しました');
+      }
+
+      const data = await response.json();
+      
+      // 新しい日記エントリーを作成
+      const newDiary = {
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        title: data.title || '今日の日記',
+        content: data.content || '日記の生成に失敗しました。',
+        mood: data.mood || 'まあまあ',
+        weather: data.weather || null,
+        generated: true,
+        createdAt: new Date().toISOString(),
+        tags: data.tags || []
+      };
+
+      // LocalStorageに保存
+      const existingDiaries = JSON.parse(localStorage.getItem('diary_entries') || '[]');
+      const updatedDiaries = [newDiary, ...existingDiaries];
+      localStorage.setItem('diary_entries', JSON.stringify(updatedDiaries));
+      
+      // 成功メッセージをチャットに追加
+      const successMessage = {
+        id: Date.now() + 1,
+        text: `✨ 日記「${data.title}」を生成しました！📓 日記タブで確認できます。`,
+        isUser: false,
+        timestamp: new Date().toISOString(),
+        isSystem: true
+      };
+
+      setMessages(prev => [...prev, successMessage]);
+      
+    } catch (error) {
+      console.error('Diary generation error:', error);
+      
+      // エラーメッセージをチャットに追加
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: "申し訳ございません。日記の生成に失敗しました。OpenAI APIキーが正しく設定されているか確認してください。",
+        isUser: false,
+        timestamp: new Date().toISOString(),
+        isSystem: true
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsGeneratingDiary(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
       {/* ヘッダー */}
       <div className="bg-indigo-600 text-white p-4">
-        <h2 className="text-xl font-bold flex items-center">
-          <span className="text-2xl mr-2">💬</span>
-          AIチャット
-        </h2>
-        <p className="text-indigo-100 text-sm">
-          AIと会話して今日の出来事を話しましょう
-        </p>
-        <div className="mt-3">
-          <APIStatus />
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold flex items-center">
+              <span className="text-2xl mr-2">💬</span>
+              AIチャット
+            </h2>
+            <p className="text-indigo-100 text-sm">
+              AIと会話して今日の出来事を話しましょう
+            </p>
+            <div className="mt-3">
+              <APIStatus />
+            </div>
+          </div>
+          
+          {messages.length > 2 && (
+            <div className="ml-4">
+              <button
+                onClick={generateDiaryFromChat}
+                disabled={isGeneratingDiary}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:bg-gray-400 text-white rounded-md text-sm font-medium transition-colors"
+                title="この会話から日記を自動生成します"
+              >
+                {isGeneratingDiary ? '🔄 生成中...' : '📓 日記生成'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
