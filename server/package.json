@@ -1,0 +1,28 @@
+{
+  "name": "ai-diary-server",
+  "version": "1.0.0",
+  "description": "AI Diary App Backend - Node.js Express server with OpenAI integration",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "build": "echo 'No build step required for Node.js'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": ["ai", "diary", "openai", "express", "node"],
+  "author": "Claude Code",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^7.1.5",
+    "openai": "^4.20.1",
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
