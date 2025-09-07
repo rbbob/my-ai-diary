@@ -109,17 +109,20 @@ const ChatContainer = () => {
 
       const data = await response.json();
       
+      // サーバーレスポンスから日記データを取得
+      const diaryData = data.diary || data;
+      
       // 新しい日記エントリーを作成
       const newDiary = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
-        title: data.title || '今日の日記',
-        content: data.content || '日記の生成に失敗しました。',
-        mood: data.mood || 'まあまあ',
-        weather: data.weather || null,
+        title: diaryData.title || '今日の日記',
+        content: diaryData.content || '日記の生成に失敗しました。',
+        mood: diaryData.mood || 'まあまあ',
+        weather: diaryData.weather || null,
         generated: true,
         createdAt: new Date().toISOString(),
-        tags: data.tags || []
+        tags: diaryData.tags || []
       };
 
       // LocalStorageに保存

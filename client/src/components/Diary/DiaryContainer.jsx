@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import DiaryList from './DiaryList';
 import DiaryEditor from './DiaryEditor';
+import DiaryCalendar from './DiaryCalendar';
 
 const DiaryContainer = () => {
   const [diaries, setDiaries] = useState([]);
   const [selectedDiary, setSelectedDiary] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [view, setView] = useState('list'); // 'list', 'edit', 'create'
+  const [view, setView] = useState('list'); // 'list', 'calendar', 'edit', 'create'
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     loadDiaries();
@@ -65,17 +67,20 @@ const DiaryContainer = () => {
 
       const data = await response.json();
       
+      // サーバーレスポンスから日記データを取得
+      const diaryData = data.diary || data;
+      
       // 新しい日記エントリーを作成
       const newDiary = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
-        title: data.title || '今日の日記',
-        content: data.content || '日記の生成に失敗しました。',
-        mood: data.mood || 'まあまあ',
-        weather: data.weather || null,
+        title: diaryData.title || '今日の日記',
+        content: diaryData.content || '日記の生成に失敗しました。',
+        mood: diaryData.mood || 'まあまあ',
+        weather: diaryData.weather || null,
         generated: true,
         createdAt: new Date().toISOString(),
-        tags: data.tags || []
+        tags: diaryData.tags || []
       };
 
       const updatedDiaries = [newDiary, ...diaries];
@@ -136,10 +141,44 @@ const DiaryContainer = () => {
   const handleBackToList = () => {
     setView('list');
     setSelectedDiary(null);
+    setSelectedDate(null);
+  };
+
+  const handleCalendarDateClick = (date) => {
+    setSelectedDate(date);
+    // その日の日記があるかチェック
+    const diaryForDate = diaries.find(d => d.date === date);
+    if (diaryForDate) {
+      setSelectedDiary(diaryForDate);
+      setView('edit');
+    } else {
+      // その日の日記がない場合は新規作成
+      const newDiary = {
+        id: Date.now(),
+        date: date,
+        title: '',
+        content: '',
+        mood: 'まあまあ',
+        weather: null,
+        generated: false,
+        createdAt: new Date().toISOString(),
+        tags: []
+      };
+      setSelectedDiary(newDiary);
+      setView('create');
+    }
   };
 
   const renderView = () => {
     switch (view) {
+      case 'calendar':
+        return (
+          <DiaryCalendar
+            diaries={diaries}
+            onDateClick={handleCalendarDateClick}
+            selectedDate={selectedDate}
+          />
+        );
       case 'edit':
       case 'create':
         return (
@@ -179,8 +218,14 @@ const DiaryContainer = () => {
             </p>
           </div>
           
-          {view === 'list' && (
+          {(view === 'list' || view === 'calendar') && (
             <div className="flex space-x-2">
+              <button
+                onClick={() => setView(view === 'list' ? 'calendar' : 'list')}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md text-sm font-medium transition-colors"
+              >
+                {view === 'list' ? '📅 カレンダー' : '📋 リスト'}
+              </button>
               <button
                 onClick={handleCreateNew}
                 className="px-4 py-2 bg-green-500 hover:bg-green-400 rounded-md text-sm font-medium transition-colors"
@@ -197,12 +242,12 @@ const DiaryContainer = () => {
             </div>
           )}
           
-          {view !== 'list' && (
+          {view !== 'list' && view !== 'calendar' && (
             <button
               onClick={handleBackToList}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 rounded-md text-sm font-medium transition-colors"
             >
-              ← 一覧に戻る
+              ← 戻る
             </button>
           )}
         </div>
