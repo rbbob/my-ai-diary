@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ChatContainer from './components/Chat/ChatContainer';
+import SettingsContainer from './components/Settings/SettingsContainer';
 
 function App() {
   const [currentView, setCurrentView] = useState('chat');
@@ -8,6 +9,8 @@ function App() {
     switch (currentView) {
       case 'chat':
         return <ChatContainer />;
+      case 'settings':
+        return <SettingsContainer />;
       case 'about':
         return <AboutSection />;
       default:
@@ -39,6 +42,16 @@ function App() {
               }`}
             >
               💬 チャット
+            </button>
+            <button
+              onClick={() => setCurrentView('settings')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                currentView === 'settings'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-600 hover:text-indigo-600'
+              }`}
+            >
+              ⚙️ 設定
             </button>
             <button
               onClick={() => setCurrentView('about')}

@@ -57,6 +57,65 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// グローバル変数でAPIキーを保存（実際のアプリでは安全な方法を使用）
+let dynamicApiKey = process.env.OPENAI_API_KEY;
+let dynamicModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
+// APIキー設定エンドポイント
+app.post('/api/config', (req, res) => {
+  const { openai_api_key, openai_model } = req.body;
+  
+  if (!openai_api_key || !openai_api_key.trim()) {
+    return res.status(400).json({ error: 'APIキーが必要です' });
+  }
+
+  // グローバル変数を更新
+  dynamicApiKey = openai_api_key;
+  dynamicModel = openai_model || 'gpt-4o-mini';
+
+  console.log(`🔄 API設定更新: モデル=${dynamicModel}, キー=${dynamicApiKey ? '設定済み' : '未設定'}`);
+
+  res.json({ 
+    success: true, 
+    message: '設定を保存しました',
+    model: dynamicModel 
+  });
+});
+
+// APIキーテストエンドポイント
+app.post('/api/test-key', async (req, res) => {
+  const { openai_api_key, openai_model } = req.body;
+  
+  if (!openai_api_key || !openai_api_key.trim()) {
+    return res.status(400).json({ error: 'APIキーが必要です' });
+  }
+
+  try {
+    // テスト用の軽量なAPI呼び出し
+    const OpenAI = (await import('openai')).default;
+    
+    const openai = new OpenAI({
+      apiKey: openai_api_key,
+    });
+
+    // 軽量なテスト呼び出し
+    const completion = await openai.chat.completions.create({
+      model: openai_model || 'gpt-4o-mini',
+      messages: [{ role: 'user', content: 'Hello' }],
+      max_tokens: 5,
+    });
+
+    res.json({ valid: true, message: 'APIキーは有効です' });
+  } catch (error) {
+    console.error('API Key Test Error:', error);
+    res.json({ valid: false, message: 'APIキーが無効です' });
+  }
+});
+
+// APIキー取得用のヘルパー関数
+global.getDynamicApiKey = () => dynamicApiKey;
+global.getDynamicModel = () => dynamicModel;
+
 // APIルート
 app.use('/api/chat', chatRoutes);
 app.use('/api/diary', diaryRoutes);

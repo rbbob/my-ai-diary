@@ -4,22 +4,25 @@ import OpenAI from 'openai';
 // 環境変数を最初に読み込み
 dotenv.config();
 
-// OpenAI クライアントの初期化
-let openai = null;
+// 動的OpenAIクライアントの取得
+function getOpenAIClient() {
+  const dynamicApiKey = global.getDynamicApiKey ? global.getDynamicApiKey() : process.env.OPENAI_API_KEY;
+  
+  if (!dynamicApiKey) {
+    console.warn('⚠️  OpenAI API Key not available. Using fallback mode.');
+    return null;
+  }
 
-if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  return new OpenAI({
+    apiKey: dynamicApiKey,
   });
-} else {
-  console.warn('⚠️  OPENAI_API_KEY is not set. OpenAI features will be disabled.');
 }
 
 /**
  * OpenAI API が利用可能かチェック
  */
 export function isOpenAIAvailable() {
-  return !!openai && !!process.env.OPENAI_API_KEY;
+  return !!getOpenAIClient();
 }
 
 /**
@@ -53,9 +56,13 @@ export async function generateChatResponse(messages, userProfile = {}) {
 回答は日本語で、自然で親しみやすい口調で行ってください。
 ユーザーが困っていることがあれば、優しくサポートしてください。`;
 
+    // 動的OpenAIクライアントを取得
+    const openai = getOpenAIClient();
+    const dynamicModel = global.getDynamicModel ? global.getDynamicModel() : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
+    
     // OpenAI API呼び出し
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: dynamicModel,
       messages: [
         { role: 'system', content: systemMessage },
         ...messages.map(msg => ({
@@ -120,8 +127,12 @@ export async function generateDiaryFromChat(messages, date) {
 チャット履歴:
 ${chatContent}`;
 
+    // 動的OpenAIクライアントを取得
+    const openai = getOpenAIClient();
+    const dynamicModel = global.getDynamicModel ? global.getDynamicModel() : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
+    
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: dynamicModel,
       messages: [
         { role: 'system', content: systemPrompt }
       ],
