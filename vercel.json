@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "ai-diary-app-fresh",
+  "name": "ai-diary-app-full",
   "builds": [
     {
       "src": "client/package.json",
@@ -8,12 +8,26 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/client/dist/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import APIStatus from './APIStatus';
 
 const ChatContainer = () => {
   const [messages, setMessages] = useState([
@@ -95,6 +96,9 @@ const ChatContainer = () => {
         <p className="text-indigo-100 text-sm">
           AIと会話して今日の出来事を話しましょう
         </p>
+        <div className="mt-3">
+          <APIStatus />
+        </div>
       </div>
 
       {/* メッセージエリア */}
