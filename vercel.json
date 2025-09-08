@@ -1,11 +1,8 @@
 {
-  "version": 2,
-  "name": "ai-diary-app",
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x",
+    "api/*.js": {
       "maxDuration": 30
     }
   },
@@ -13,10 +10,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/client/dist/$1"
     }
   ]
 }
