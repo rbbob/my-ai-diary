@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
     console.log(`💬 Chat request: ${message.substring(0, 50)}...`);
 
     // AI応答を生成
-    const aiResponse = await generateChatResponse(chatHistory, userProfile);
+    const aiResponse = await generateChatResponse(chatHistory, userProfile, apiKey);
 
     // 応答を返す
     res.status(200).json({

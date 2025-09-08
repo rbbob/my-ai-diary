@@ -2,8 +2,8 @@
 const OpenAI = require('openai').default;
 
 // 動的OpenAIクライアントの取得
-function getOpenAIClient() {
-  const dynamicApiKey = process.env.OPENAI_API_KEY;
+function getOpenAIClient(providedApiKey = null) {
+  const dynamicApiKey = providedApiKey || global.userApiKey || process.env.OPENAI_API_KEY;
   
   if (!dynamicApiKey) {
     console.warn('⚠️  OpenAI API Key not available. Using fallback mode.');
@@ -18,8 +18,8 @@ function getOpenAIClient() {
 /**
  * OpenAI API が利用可能かチェック
  */
-function isOpenAIAvailable() {
-  const dynamicApiKey = process.env.OPENAI_API_KEY;
+function isOpenAIAvailable(providedApiKey = null) {
+  const dynamicApiKey = providedApiKey || global.userApiKey || process.env.OPENAI_API_KEY;
   
   console.log('🔍 Checking OpenAI availability:', { 
     hasKey: !!dynamicApiKey, 
@@ -34,14 +34,14 @@ function isOpenAIAvailable() {
   }
   
   console.log('✅ OpenAI API available');
-  return !!getOpenAIClient();
+  return !!getOpenAIClient(providedApiKey);
 }
 
 /**
  * チャット応答を生成
  */
-async function generateChatResponse(messages, userProfile = {}) {
-  if (!isOpenAIAvailable()) {
+async function generateChatResponse(messages, userProfile = {}, providedApiKey = null) {
+  if (!isOpenAIAvailable(providedApiKey)) {
     console.log('💬 Demo mode: Generating sample chat response');
     
     // デモモードでより自然な会話応答を生成
@@ -107,8 +107,8 @@ async function generateChatResponse(messages, userProfile = {}) {
 ユーザーが困っていることがあれば、優しくサポートしてください。`;
 
     // 動的OpenAIクライアントを取得
-    const openai = getOpenAIClient();
-    const dynamicModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    const openai = getOpenAIClient(providedApiKey);
+    const dynamicModel = global.userModel || process.env.OPENAI_MODEL || 'gpt-4o-mini';
     
     // OpenAI API呼び出し
     const response = await openai.chat.completions.create({
