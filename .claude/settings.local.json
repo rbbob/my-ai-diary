@@ -15,7 +15,10 @@
       "Bash(taskkill:*)",
       "Bash(npm run dev:*)",
       "Bash(wmic process where:*)",
-      "Bash(PORT=3005 npm run dev)"
+      "Bash(PORT=3005 npm run dev)",
+      "Bash(git remote remove:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []

@@ -163,6 +163,10 @@ const ChatContainer = () => {
     setIsLoading(true);
 
     try {
+      // LocalStorageからAPIキー設定を取得
+      const apiKey = localStorage.getItem('openai_api_key');
+      const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+
       const data = await fetchWithRetry('/api/chat', {
         method: 'POST',
         headers: {
@@ -170,7 +174,9 @@ const ChatContainer = () => {
         },
         body: JSON.stringify({
           message: messageText,
-          messages: messages
+          messages: messages,
+          apiKey: apiKey,
+          model: model
         })
       });
       
@@ -228,6 +234,10 @@ const ChatContainer = () => {
     setIsGeneratingDiary(true);
     
     try {
+      // LocalStorageからAPIキー設定を取得
+      const apiKey = localStorage.getItem('openai_api_key');
+      const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+
       // 日記生成API呼び出し（リトライ機能付き）
       const data = await fetchWithRetry('/api/diary/generate', {
         method: 'POST',
@@ -236,7 +246,9 @@ const ChatContainer = () => {
         },
         body: JSON.stringify({
           messages: messages,
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          apiKey: apiKey,
+          model: model
         })
       });
       

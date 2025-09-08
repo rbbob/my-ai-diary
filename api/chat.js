@@ -19,7 +19,17 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { message, messages = [], userProfile = {} } = req.body;
+    const { message, messages = [], userProfile = {}, apiKey, model } = req.body;
+
+    // ユーザー設定のAPIキーが送信された場合は動的に設定
+    if (apiKey && apiKey.startsWith('sk-')) {
+      global.userApiKey = apiKey;
+      global.getDynamicApiKey = () => global.userApiKey;
+    }
+    if (model) {
+      global.userModel = model;
+      global.getDynamicModel = () => global.userModel;
+    }
 
     // バリデーション
     if (!message || typeof message !== 'string') {
