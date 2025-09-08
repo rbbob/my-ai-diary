@@ -1,7 +1,9 @@
+const { isOpenAIAvailable } = require('./openaiService');
+
 /**
  * ヘルスチェック用API
  */
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -16,11 +18,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  res.status(200).json({
+  const healthData = {
     status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production',
-    openai_configured: !!process.env.OPENAI_API_KEY,
+    openai_configured: isOpenAIAvailable(),
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini'
-  });
-}
+  };
+
+  console.log('Health check:', healthData);
+
+  res.status(200).json(healthData);
+};

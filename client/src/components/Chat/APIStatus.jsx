@@ -14,9 +14,24 @@ const APIStatus = () => {
 
   const checkAPIStatus = async () => {
     try {
-      const response = await fetch('/api/health');
+      // より短いタイムアウトでリトライ
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒タイムアウト
+
+      const response = await fetch('/api/health', {
+        signal: controller.signal,
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ API Status check successful:', data);
         setApiStatus({
           status: 'online',
           openai_configured: data.openai_configured,
@@ -24,14 +39,27 @@ const APIStatus = () => {
           error: null
         });
       } else {
-        throw new Error('API接続失敗');
+        throw new Error(`API接続失敗: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
+      console.warn('❌ API Status check failed:', error.message);
+      
+      let errorMessage = 'API接続エラー';
+      
+      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+        errorMessage = 'タイムアウト';
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = '接続失敗';
+      } else if (error.message.includes('message port closed') || 
+                 error.message.includes('message channel closed')) {
+        errorMessage = 'ブラウザ通信エラー';
+      }
+
       setApiStatus({
         status: 'offline',
         openai_configured: false,
         model: null,
-        error: error.message
+        error: errorMessage
       });
     }
   };

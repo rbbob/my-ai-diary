@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "ai-diary-app-full",
+  "name": "ai-diary-app",
   "builds": [
     {
       "src": "client/package.json",
@@ -29,5 +29,8 @@
       "runtime": "nodejs18.x",
       "maxDuration": 30
     }
+  },
+  "env": {
+    "NODE_ENV": "production"
   }
 }

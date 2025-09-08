@@ -97,16 +97,22 @@ const DiaryCalendar = ({ diaries, onDateClick, selectedDate }) => {
         <div
           key={date}
           onClick={() => handleDateClick(date)}
-          className={`aspect-square p-1 cursor-pointer rounded-lg transition-all hover:bg-blue-50 ${
-            selected ? 'bg-blue-500 text-white' : ''
-          } ${todayClass ? 'ring-2 ring-green-500' : ''}`}
+          className={`aspect-square p-2 cursor-pointer rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-md ${
+            selected 
+              ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg scale-105' 
+              : hasEntry 
+                ? 'bg-gradient-to-br from-green-100 to-blue-100 hover:from-green-200 hover:to-blue-200' 
+                : 'bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
+          } ${todayClass ? 'ring-3 ring-green-400 ring-offset-2' : ''}`}
         >
-          <div className="h-full flex flex-col items-center justify-center text-sm">
-            <span className={`font-medium ${selected ? 'text-white' : ''}`}>
+          <div className="h-full flex flex-col items-center justify-center">
+            <span className={`text-lg font-bold mb-1 ${
+              selected ? 'text-white' : todayClass ? 'text-green-600' : hasEntry ? 'text-gray-800' : 'text-gray-600'
+            }`}>
               {date}
             </span>
             {hasEntry && (
-              <span className="text-xs mt-1">
+              <span className="text-xl animate-pulse">
                 {getMoodEmoji(mood)}
               </span>
             )}
@@ -119,35 +125,37 @@ const DiaryCalendar = ({ diaries, onDateClick, selectedDate }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg shadow-lg border border-gray-100">
       {/* カレンダーヘッダー */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <button
-          onClick={() => changeMonth(-1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-        >
-          ← 前月
-        </button>
-        
-        <h3 className="text-lg font-semibold text-gray-800">
-          {year}年 {monthNames[month]}
-        </h3>
-        
-        <button
-          onClick={() => changeMonth(1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-        >
-          次月 →
-        </button>
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-t-lg">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => changeMonth(-1)}
+            className="p-3 hover:bg-white/20 rounded-lg transition-all duration-200 font-medium"
+          >
+            <span className="text-xl">←</span> 前月
+          </button>
+          
+          <h2 className="text-2xl font-bold text-center">
+            {year}年 {monthNames[month]}
+          </h2>
+          
+          <button
+            onClick={() => changeMonth(1)}
+            className="p-3 hover:bg-white/20 rounded-lg transition-all duration-200 font-medium"
+          >
+            次月 <span className="text-xl">→</span>
+          </button>
+        </div>
       </div>
 
       {/* 曜日ヘッダー */}
-      <div className="grid grid-cols-7 border-b border-gray-200">
+      <div className="grid grid-cols-7 bg-gray-50">
         {dayNames.map((day, index) => (
           <div
             key={day}
-            className={`p-3 text-center text-sm font-medium ${
-              index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-700'
+            className={`p-4 text-center font-bold ${
+              index === 0 ? 'text-red-500' : index === 6 ? 'text-blue-500' : 'text-gray-700'
             }`}
           >
             {day}
@@ -156,28 +164,32 @@ const DiaryCalendar = ({ diaries, onDateClick, selectedDate }) => {
       </div>
 
       {/* カレンダーグリッド */}
-      <div className="grid grid-cols-7 gap-1 p-2">
+      <div className="grid grid-cols-7 gap-2 p-4 bg-gray-50/30">
         {renderCalendarDays()}
       </div>
 
-      {/* 凡例 */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
-        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-blue-500 rounded"></div>
-            <span>選択中</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 ring-2 ring-green-500 rounded"></div>
-            <span>今日</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span>📝</span>
-            <span>日記あり</span>
+      {/* 説明・凡例 */}
+      <div className="p-6 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="text-center mb-4">
+          <p className="text-gray-700 font-medium">📅 日付をクリックしてAI日記を自動生成・編集</p>
+          <p className="text-gray-500 text-sm">空の日付：クリックでAI日記生成 | 絵文字がある日：クリックで編集</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-500 rounded-lg shadow-sm"></div>
+            <span className="font-medium text-gray-700">選択中</span>
           </div>
           <div className="flex items-center gap-2">
-            <span>😄😊😐😞😢</span>
-            <span>気分</span>
+            <div className="w-6 h-6 ring-3 ring-green-500 rounded-lg shadow-sm bg-white"></div>
+            <span className="font-medium text-gray-700">今日</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📝</span>
+            <span className="font-medium text-gray-700">日記あり</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">😄😊😐😞😢</span>
+            <span className="font-medium text-gray-700">気分表示</span>
           </div>
         </div>
       </div>

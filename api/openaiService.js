@@ -1,12 +1,9 @@
-import dotenv from 'dotenv';
-import OpenAI from 'openai';
-
 // 環境変数を最初に読み込み
-dotenv.config();
+const OpenAI = require('openai').default;
 
 // 動的OpenAIクライアントの取得
 function getOpenAIClient() {
-  const dynamicApiKey = global.getDynamicApiKey ? global.getDynamicApiKey() : process.env.OPENAI_API_KEY;
+  const dynamicApiKey = process.env.OPENAI_API_KEY;
   
   if (!dynamicApiKey) {
     console.warn('⚠️  OpenAI API Key not available. Using fallback mode.');
@@ -21,8 +18,8 @@ function getOpenAIClient() {
 /**
  * OpenAI API が利用可能かチェック
  */
-export function isOpenAIAvailable() {
-  const dynamicApiKey = global.getDynamicApiKey ? global.getDynamicApiKey() : process.env.OPENAI_API_KEY;
+function isOpenAIAvailable() {
+  const dynamicApiKey = process.env.OPENAI_API_KEY;
   
   console.log('🔍 Checking OpenAI availability:', { 
     hasKey: !!dynamicApiKey, 
@@ -43,7 +40,7 @@ export function isOpenAIAvailable() {
 /**
  * チャット応答を生成
  */
-export async function generateChatResponse(messages, userProfile = {}) {
+async function generateChatResponse(messages, userProfile = {}) {
   if (!isOpenAIAvailable()) {
     console.log('💬 Demo mode: Generating sample chat response');
     
@@ -111,7 +108,7 @@ export async function generateChatResponse(messages, userProfile = {}) {
 
     // 動的OpenAIクライアントを取得
     const openai = getOpenAIClient();
-    const dynamicModel = global.getDynamicModel ? global.getDynamicModel() : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
+    const dynamicModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
     
     // OpenAI API呼び出し
     const response = await openai.chat.completions.create({
@@ -145,7 +142,7 @@ export async function generateChatResponse(messages, userProfile = {}) {
 /**
  * チャット履歴から日記を生成
  */
-export async function generateDiaryFromChat(messages, date) {
+async function generateDiaryFromChat(messages, date) {
   if (!isOpenAIAvailable()) {
     // デモモードでサンプル日記を生成
     console.log('📝 Demo mode: Generating sample diary');
@@ -202,7 +199,7 @@ ${chatContent}
 
     // 動的OpenAIクライアントを取得
     const openai = getOpenAIClient();
-    const dynamicModel = global.getDynamicModel ? global.getDynamicModel() : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
+    const dynamicModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
     
     const response = await openai.chat.completions.create({
       model: dynamicModel,
@@ -237,7 +234,7 @@ ${chatContent}
   }
 }
 
-export default {
+module.exports = {
   isOpenAIAvailable,
   generateChatResponse,
   generateDiaryFromChat

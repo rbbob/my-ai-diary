@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DiaryList = ({ diaries, onEdit, onDelete, onCreateNew, onGenerateFromChat, isGenerating }) => {
+const DiaryList = ({ diaries, onEdit, onDelete, onGenerateFromChat, isGenerating }) => {
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ja-JP', {
@@ -43,27 +43,30 @@ const DiaryList = ({ diaries, onEdit, onDelete, onCreateNew, onGenerateFromChat,
     return (
       <div className="p-8 text-center">
         <div className="text-6xl mb-4">📝</div>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <h3 className="text-2xl font-bold text-gray-800 mb-3">
           まだ日記がありません
         </h3>
-        <p className="text-gray-500 mb-6">
-          新しい日記を作成するか、チャット履歴から自動生成してみましょう！
+        <p className="text-gray-600 mb-8 text-lg">
+          AIとチャットしてから、AI日記を自動生成してみましょう！<br/>
+          あなたの会話が素敵な日記に変わります ✨
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onCreateNew}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            ✏️ 新しい日記を書く
-          </button>
-          <button
-            onClick={onGenerateFromChat}
-            disabled={isGenerating}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-colors"
-          >
-            {isGenerating ? '🔄 生成中...' : '🤖 AI日記を生成'}
-          </button>
-        </div>
+        <button
+          onClick={onGenerateFromChat}
+          disabled={isGenerating}
+          className="px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl text-lg font-bold shadow-lg transform hover:scale-105 transition-all duration-200 disabled:transform-none"
+        >
+          {isGenerating ? (
+            <>
+              <span className="inline-block animate-spin mr-2">🔄</span>
+              AI日記を生成中...
+            </>
+          ) : (
+            <>
+              <span className="mr-2">🤖</span>
+              AI日記を自動生成する
+            </>
+          )}
+        </button>
       </div>
     );
   }

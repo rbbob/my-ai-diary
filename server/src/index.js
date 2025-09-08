@@ -143,4 +143,4 @@ app.listen(PORT, () => {
   console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? 'Configured' : 'Missing'}`);
 });
 
-export default app;
+export default app;// trigger restart

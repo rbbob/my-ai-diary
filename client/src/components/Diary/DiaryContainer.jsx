@@ -7,7 +7,7 @@ const DiaryContainer = () => {
   const [diaries, setDiaries] = useState([]);
   const [selectedDiary, setSelectedDiary] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [view, setView] = useState('list'); // 'list', 'calendar', 'edit', 'create'
+  const [view, setView] = useState('calendar'); // 'list', 'calendar', 'edit', 'create'
   const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const DiaryContainer = () => {
     setDiaries(updatedDiaries);
   };
 
-  const generateDiaryFromChat = async () => {
+  const generateDiaryForDate = async (targetDate) => {
     setIsGenerating(true);
     
     try {
@@ -49,7 +49,7 @@ const DiaryContainer = () => {
         return;
       }
 
-      // 日記生成API呼び出し
+      // 指定された日付で日記生成API呼び出し
       const response = await fetch('/api/diary/generate', {
         method: 'POST',
         headers: {
@@ -57,7 +57,7 @@ const DiaryContainer = () => {
         },
         body: JSON.stringify({
           messages: messages,
-          date: new Date().toISOString().split('T')[0]
+          date: targetDate
         }),
       });
 
@@ -73,8 +73,8 @@ const DiaryContainer = () => {
       // 新しい日記エントリーを作成
       const newDiary = {
         id: Date.now(),
-        date: new Date().toISOString().split('T')[0],
-        title: diaryData.title || '今日の日記',
+        date: targetDate,
+        title: diaryData.title || `${targetDate}の日記`,
         content: diaryData.content || '日記の生成に失敗しました。',
         mood: diaryData.mood || 'まあまあ',
         weather: diaryData.weather || null,
@@ -86,8 +86,9 @@ const DiaryContainer = () => {
       const updatedDiaries = [newDiary, ...diaries];
       saveDiaries(updatedDiaries);
       
-      setSelectedDiary(newDiary);
-      setView('edit');
+      // 生成された日記をカレンダーで選択状態にする
+      setSelectedDate(targetDate);
+      // カレンダービューのままにする
       
     } catch (error) {
       console.error('Diary generation error:', error);
@@ -95,6 +96,12 @@ const DiaryContainer = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const generateDiaryFromChat = async () => {
+    // 今日の日付で日記を生成
+    const today = new Date().toISOString().split('T')[0];
+    await generateDiaryForDate(today);
   };
 
   const handleSaveDiary = (diary) => {
@@ -122,50 +129,24 @@ const DiaryContainer = () => {
     setView('edit');
   };
 
-  const handleCreateNew = () => {
-    const newDiary = {
-      id: Date.now(),
-      date: new Date().toISOString().split('T')[0],
-      title: '',
-      content: '',
-      mood: 'まあまあ',
-      weather: null,
-      generated: false,
-      createdAt: new Date().toISOString(),
-      tags: []
-    };
-    setSelectedDiary(newDiary);
-    setView('create');
-  };
 
   const handleBackToList = () => {
-    setView('list');
+    setView('calendar');
     setSelectedDiary(null);
     setSelectedDate(null);
   };
 
-  const handleCalendarDateClick = (date) => {
+  const handleCalendarDateClick = async (date) => {
     setSelectedDate(date);
     // その日の日記があるかチェック
     const diaryForDate = diaries.find(d => d.date === date);
     if (diaryForDate) {
+      // 既存の日記は編集
       setSelectedDiary(diaryForDate);
       setView('edit');
     } else {
-      // その日の日記がない場合は新規作成
-      const newDiary = {
-        id: Date.now(),
-        date: date,
-        title: '',
-        content: '',
-        mood: 'まあまあ',
-        weather: null,
-        generated: false,
-        createdAt: new Date().toISOString(),
-        tags: []
-      };
-      setSelectedDiary(newDiary);
-      setView('create');
+      // 日記がない場合は、その日付でAI日記を自動生成
+      await generateDiaryForDate(date);
     }
   };
 
@@ -195,7 +176,6 @@ const DiaryContainer = () => {
             diaries={diaries}
             onEdit={handleEditDiary}
             onDelete={handleDeleteDiary}
-            onCreateNew={handleCreateNew}
             onGenerateFromChat={generateDiaryFromChat}
             isGenerating={isGenerating}
           />
@@ -204,54 +184,84 @@ const DiaryContainer = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* ヘッダー */}
-      <div className="bg-green-600 text-white p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold flex items-center">
-              <span className="text-2xl mr-2">📓</span>
-              日記
-            </h2>
-            <p className="text-green-100 text-sm">
-              あなたの思い出を美しく記録しましょう
-            </p>
-          </div>
-          
-          {(view === 'list' || view === 'calendar') && (
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setView(view === 'list' ? 'calendar' : 'list')}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md text-sm font-medium transition-colors"
-              >
-                {view === 'list' ? '📅 カレンダー' : '📋 リスト'}
-              </button>
-              <button
-                onClick={handleCreateNew}
-                className="px-4 py-2 bg-green-500 hover:bg-green-400 rounded-md text-sm font-medium transition-colors"
-              >
-                ✏️ 新規作成
-              </button>
-              <button
-                onClick={generateDiaryFromChat}
-                disabled={isGenerating}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-400 rounded-md text-sm font-medium transition-colors"
-              >
-                {isGenerating ? '🔄 生成中...' : '🤖 AI日記生成'}
-              </button>
-            </div>
-          )}
-          
-          {view !== 'list' && view !== 'calendar' && (
-            <button
-              onClick={handleBackToList}
-              className="px-4 py-2 bg-green-500 hover:bg-green-400 rounded-md text-sm font-medium transition-colors"
-            >
-              ← 戻る
-            </button>
-          )}
+    <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* メインヘッダー */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold flex items-center justify-center mb-2">
+            <span className="text-4xl mr-3">📓</span>
+            AI日記アプリ
+          </h1>
+          <p className="text-blue-100 text-lg">
+            AIと一緒に、今日の思い出を美しく記録しましょう
+          </p>
         </div>
       </div>
+
+      {/* アクションバー */}
+      {(view === 'list' || view === 'calendar') && (
+        <div className="bg-gray-50 border-b border-gray-200 p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            {/* メイン機能 - AI日記生成 */}
+            <button
+              onClick={generateDiaryFromChat}
+              disabled={isGenerating}
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl text-lg font-bold shadow-lg transform hover:scale-105 transition-all duration-200 disabled:transform-none"
+            >
+              {isGenerating ? (
+                <>
+                  <span className="inline-block animate-spin mr-2">🔄</span>
+                  AI日記を生成中...
+                </>
+              ) : (
+                <>
+                  <span className="mr-2">✨</span>
+                  AI日記を自動生成
+                </>
+              )}
+            </button>
+            
+            {/* 表示切り替えタブ */}
+            <div className="flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setView('list')}
+                className={`px-6 py-3 font-medium transition-all ${
+                  view === 'list'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="mr-2">📋</span>
+                リスト表示
+              </button>
+              <button
+                onClick={() => setView('calendar')}
+                className={`px-6 py-3 font-medium transition-all ${
+                  view === 'calendar'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="mr-2">📅</span>
+                カレンダー表示
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+      
+      {/* 編集画面での戻るボタン */}
+      {view !== 'list' && view !== 'calendar' && (
+        <div className="bg-gray-50 border-b border-gray-200 p-4">
+          <button
+            onClick={handleBackToList}
+            className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+          >
+            ← カレンダーに戻る
+          </button>
+        </div>
+      )}
 
       {/* メインコンテンツ */}
       <div className="min-h-96">
