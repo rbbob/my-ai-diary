@@ -10,13 +10,66 @@ const APIStatus = () => {
 
   useEffect(() => {
     checkAPIStatus();
+    
+    // LocalStorageの変更を監視
+    const handleStorageChange = (e) => {
+      if (e.key === 'openai_api_key' || e.key === 'openai_model') {
+        console.log('🔄 LocalStorage API settings changed, rechecking status...');
+        setTimeout(checkAPIStatus, 500); // 少し遅延して実行
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const checkAPIStatus = async () => {
     try {
-      // より短いタイムアウトでリトライ
+      // まずLocalStorageの設定をチェック
+      const localApiKey = localStorage.getItem('openai_api_key');
+      const localModel = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+      
+      // LocalStorageにAPIキーがある場合は、それをサーバーに送信してチェック
+      if (localApiKey && localApiKey.startsWith('sk-')) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒タイムアウト
+
+        const response = await fetch('/api/test-key', {
+          method: 'POST',
+          signal: controller.signal,
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          body: JSON.stringify({
+            openai_api_key: localApiKey,
+            openai_model: localModel
+          })
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ LocalStorage API key test successful:', data);
+          setApiStatus({
+            status: 'online',
+            openai_configured: data.valid,
+            model: localModel,
+            error: null
+          });
+          return;
+        }
+      }
+
+      // LocalStorageにAPIキーがない場合はサーバーのヘルスチェック
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒タイムアウト
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const response = await fetch('/api/health', {
         signal: controller.signal,
