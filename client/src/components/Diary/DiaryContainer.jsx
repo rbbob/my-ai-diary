@@ -6,7 +6,6 @@ import DiaryCalendar from './DiaryCalendar';
 const DiaryContainer = () => {
   const [diaries, setDiaries] = useState([]);
   const [selectedDiary, setSelectedDiary] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [view, setView] = useState('calendar'); // 'list', 'calendar', 'edit', 'create'
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -33,8 +32,6 @@ const DiaryContainer = () => {
   };
 
   const generateDiaryForDate = async (targetDate) => {
-    setIsGenerating(true);
-    
     try {
       // チャット履歴を取得
       const chatMessages = localStorage.getItem('chat_messages');
@@ -93,16 +90,9 @@ const DiaryContainer = () => {
     } catch (error) {
       console.error('Diary generation error:', error);
       alert('日記の生成に失敗しました: ' + error.message);
-    } finally {
-      setIsGenerating(false);
     }
   };
 
-  const generateDiaryFromChat = async () => {
-    // 今日の日付で日記を生成
-    const today = new Date().toISOString().split('T')[0];
-    await generateDiaryForDate(today);
-  };
 
   const handleSaveDiary = (diary) => {
     const updatedDiaries = diaries.map(d => 
@@ -176,8 +166,6 @@ const DiaryContainer = () => {
             diaries={diaries}
             onEdit={handleEditDiary}
             onDelete={handleDeleteDiary}
-            onGenerateFromChat={generateDiaryFromChat}
-            isGenerating={isGenerating}
           />
         );
     }
@@ -198,30 +186,10 @@ const DiaryContainer = () => {
         </div>
       </div>
 
-      {/* アクションバー */}
+      {/* 表示切り替えタブ */}
       {(view === 'list' || view === 'calendar') && (
         <div className="bg-gray-50 border-b border-gray-200 p-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            {/* メイン機能 - AI日記生成 */}
-            <button
-              onClick={generateDiaryFromChat}
-              disabled={isGenerating}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl text-lg font-bold shadow-lg transform hover:scale-105 transition-all duration-200 disabled:transform-none"
-            >
-              {isGenerating ? (
-                <>
-                  <span className="inline-block animate-spin mr-2">🔄</span>
-                  AI日記を生成中...
-                </>
-              ) : (
-                <>
-                  <span className="mr-2">✨</span>
-                  AI日記を自動生成
-                </>
-              )}
-            </button>
-            
-            {/* 表示切り替えタブ */}
+          <div className="flex justify-center">
             <div className="flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setView('list')}

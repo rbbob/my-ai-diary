@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DiaryList = ({ diaries, onEdit, onDelete, onGenerateFromChat, isGenerating }) => {
+const DiaryList = ({ diaries, onEdit, onDelete }) => {
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ja-JP', {
@@ -46,27 +46,18 @@ const DiaryList = ({ diaries, onEdit, onDelete, onGenerateFromChat, isGenerating
         <h3 className="text-2xl font-bold text-gray-800 mb-3">
           まだ日記がありません
         </h3>
-        <p className="text-gray-600 mb-8 text-lg">
-          AIとチャットしてから、AI日記を自動生成してみましょう！<br/>
-          あなたの会話が素敵な日記に変わります ✨
+        <p className="text-gray-600 mb-6 text-lg">
+          AIとチャットしてから、📅<strong>カレンダー表示</strong>に切り替えて<br/>
+          日付をクリックすると日記が自動生成されます ✨
         </p>
-        <button
-          onClick={onGenerateFromChat}
-          disabled={isGenerating}
-          className="px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl text-lg font-bold shadow-lg transform hover:scale-105 transition-all duration-200 disabled:transform-none"
-        >
-          {isGenerating ? (
-            <>
-              <span className="inline-block animate-spin mr-2">🔄</span>
-              AI日記を生成中...
-            </>
-          ) : (
-            <>
-              <span className="mr-2">🤖</span>
-              AI日記を自動生成する
-            </>
-          )}
-        </button>
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-blue-800 text-sm">
+            💡 <strong>使い方：</strong><br/>
+            1. まずAIとチャットで今日の出来事を話す<br/>
+            2. カレンダー表示タブをクリック<br/>
+            3. 日付をクリックして日記を自動生成
+          </p>
+        </div>
       </div>
     );
   }
