@@ -47,7 +47,7 @@ export const exportToCSV = (diaries) => {
 };
 
 /**
- * 日記データをDOCX形式（Word文書）でエクスポート
+ * 日記データをWord互換形式でエクスポート
  */
 export const exportToDOCX = (diaries) => {
   if (!diaries || diaries.length === 0) {
@@ -58,76 +58,161 @@ export const exportToDOCX = (diaries) => {
   // 気分の絵文字マップ
   const getMoodEmoji = (mood) => {
     const moodMap = {
-      '最高': '(^_^)',
-      '良い': '(^o^)',
-      'まあまあ': '(-_-)',
-      '悪い': '(T_T)',
-      '最悪': '(;_;)'
+      '最高': '😄',
+      '良い': '😊',
+      'まあまあ': '😐',
+      '悪い': '😞',
+      '最悪': '😢'
     };
-    return moodMap[mood] || '(-_-)';
+    return moodMap[mood] || '😐';
   };
 
   // 天気の絵文字マップ
   const getWeatherEmoji = (weather) => {
     if (!weather) return '';
     const weatherMap = {
-      '晴れ': '[晴]',
-      '曇り': '[曇]',
-      '雨': '[雨]',
-      '雪': '[雪]',
-      '台風': '[台風]'
+      '晴れ': '☀️',
+      '曇り': '☁️',
+      '雨': '🌧️',
+      '雪': '❄️',
+      '台風': '🌪️'
     };
-    return weatherMap[weather] || '[天気]';
+    return weatherMap[weather] || '🌤️';
   };
 
-  // RTF形式のドキュメント作成（Word互換）
-  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 MS Mincho;}{\\f1 MS Gothic;}}
-{\\colortbl;\\red68\\green114\\blue196;\\red102\\green102\\blue102;\\red51\\green51\\blue51;}
-\\viewkind4\\uc1\\pard\\cf1\\f0\\fs28\\qc\\b AI日記\\b0\\par
-\\cf2\\fs20\\qc エクスポート日: ${new Date().toLocaleDateString('ja-JP')} | 合計: ${diaries.length}件\\par
-\\pard\\par
-\\cf3\\fs24\\line\\line
-
-${diaries.map((diary, index) => {
-  const title = (diary.title || '無題の日記').replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}');
-  const content = (diary.content || '').replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par ');
-  const dateStr = new Date(diary.date).toLocaleDateString('ja-JP', { 
+  // シンプルなHTML形式でWord互換ドキュメントを作成
+  const htmlContent = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI日記 - ${new Date().toLocaleDateString('ja-JP')}</title>
+<style>
+  body { 
+    font-family: 'MS Mincho', 'MS PMincho', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif; 
+    font-size: 12pt; 
+    line-height: 1.8; 
+    margin: 2cm; 
+    color: #333; 
+  }
+  .header { 
+    text-align: center; 
+    border-bottom: 2px solid #4472c4; 
+    padding-bottom: 20px; 
+    margin-bottom: 30px; 
+  }
+  .header h1 { 
+    font-size: 24pt; 
+    font-weight: bold; 
+    color: #4472c4; 
+    margin: 0; 
+  }
+  .header p { 
+    font-size: 12pt; 
+    color: #666; 
+    margin: 10px 0 0 0; 
+  }
+  .diary-entry { 
+    margin-bottom: 40px; 
+    padding: 20px; 
+    border: 1px solid #ddd; 
+    background: #f9f9f9; 
+    page-break-inside: avoid; 
+  }
+  .diary-title { 
+    font-size: 16pt; 
+    font-weight: bold; 
+    color: #333; 
+    margin: 0 0 10px 0; 
+  }
+  .diary-meta { 
+    font-size: 11pt; 
+    color: #666; 
+    margin-bottom: 15px; 
+    border-bottom: 1px solid #ddd; 
+    padding-bottom: 10px; 
+  }
+  .diary-content { 
+    font-size: 12pt; 
+    line-height: 1.8; 
+    white-space: pre-wrap; 
+    margin-bottom: 15px; 
+  }
+  .diary-tags { 
+    font-size: 10pt; 
+    color: #0969da; 
+    font-style: italic; 
+  }
+  .summary { 
+    margin-top: 30px; 
+    padding: 15px; 
+    background: #f0f0f0; 
+    border: 1px solid #ddd; 
+    text-align: center; 
+  }
+  @media print { 
+    .diary-entry { 
+      page-break-after: always; 
+    } 
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📓 AI日記</h1>
+  <p>エクスポート日: ${new Date().toLocaleDateString('ja-JP', { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric', 
     weekday: 'long' 
+  })} | 合計: ${diaries.length}件</p>
+</div>
+
+${diaries.map(diary => `
+<div class="diary-entry">
+  <div class="diary-title">${diary.title || '無題の日記'}</div>
+  <div class="diary-meta">
+    📅 ${new Date(diary.date).toLocaleDateString('ja-JP', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric', 
+      weekday: 'long' 
+    })} | 
+    ${getMoodEmoji(diary.mood)} ${diary.mood || 'まあまあ'}${diary.weather ? ` | ${getWeatherEmoji(diary.weather)} ${diary.weather}` : ''}${diary.generated ? ' | 🤖 AI生成' : ''}
+  </div>
+  <div class="diary-content">${(diary.content || '').replace(/\n/g, '<br>')}</div>
+  ${diary.tags && diary.tags.length > 0 ? `
+    <div class="diary-tags">
+      タグ: ${diary.tags.map(tag => `#${tag}`).join(', ')}
+    </div>
+  ` : ''}
+</div>
+`).join('')}
+
+<div class="summary">
+  <p><strong>📊 統計情報</strong></p>
+  <p>総日記数: ${diaries.length}件 | AI生成: ${diaries.filter(d => d.generated).length}件 | 手動作成: ${diaries.filter(d => !d.generated).length}件</p>
+</div>
+</body>
+</html>`;
+
+  // BOMを追加してUTF-8エンコーディングを明確に指定
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + htmlContent], { 
+    type: 'text/html;charset=utf-8' 
   });
-  const mood = getMoodEmoji(diary.mood);
-  const weather = getWeatherEmoji(diary.weather);
-  const tags = diary.tags && diary.tags.length > 0 ? diary.tags.map(tag => `#${tag}`).join(', ') : '';
   
-  return `\\pard\\sb240\\sa120\\brdrt\\brdrs\\brdrw10\\brdrcf2\\par
-\\fs24\\b ${title}\\b0\\par
-\\fs18\\cf2 ${dateStr} | ${mood} ${diary.mood || 'まあまあ'}${diary.weather ? ` | ${weather} ${diary.weather}` : ''}${diary.generated ? ' | [AI生成]' : ''}\\par
-\\pard\\sb120\\sa120\\fs22\\cf3 ${content}\\par
-${tags ? `\\fs16\\cf2\\i タグ: ${tags}\\i0\\par` : ''}
-${index < diaries.length - 1 ? '\\page' : ''}`;
-}).join('')}
-
-\\pard\\sb240\\sa120\\brdrt\\brdrs\\brdrw10\\brdrcf1\\par
-\\fs20\\qc\\b 統計情報\\b0\\par
-\\fs18\\qc 総日記数: ${diaries.length}件 | AI生成: ${diaries.filter(d => d.generated).length}件 | 手動作成: ${diaries.filter(d => !d.generated).length}件\\par
-}`;
-
-  // RTFファイルとしてダウンロード（Wordで開ける）
-  const blob = new Blob([rtfContent], { type: 'application/rtf;charset=utf-8' });
-  
-  // ダウンロード
+  // HTMLファイルとしてダウンロード（Wordで開ける）
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
   link.setAttribute('href', url);
-  link.setAttribute('download', `AI日記_${new Date().toISOString().split('T')[0]}.rtf`);
+  link.setAttribute('download', `AI日記_${new Date().toISOString().split('T')[0]}.html`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 
-  console.log(`📄 ${diaries.length}件の日記をRTF形式（Word互換）でエクスポートしました`);
+  console.log(`📄 ${diaries.length}件の日記をHTML形式（Word互換）でエクスポートしました`);
 };
 
 /**
