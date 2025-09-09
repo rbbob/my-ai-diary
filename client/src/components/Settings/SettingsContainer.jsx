@@ -101,6 +101,29 @@ const SettingsContainer = () => {
     }
   };
 
+  const handleClear = () => {
+    if (window.confirm('すべての設定をクリアしますか？')) {
+      setApiKey('');
+      setModel('gpt-4o-mini');
+      localStorage.removeItem('openai_api_key');
+      localStorage.removeItem('openai_model');
+      setMessage('✨ 設定をクリアしました');
+      
+      // 3秒後にメッセージをクリア
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleShowKey = () => {
+    const input = document.getElementById('api-key');
+    if (input.type === 'password') {
+      input.type = 'text';
+      setTimeout(() => {
+        input.type = 'password';
+      }, 3000); // 3秒後に再度隠す
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
@@ -155,11 +178,11 @@ const SettingsContainer = () => {
             </div>
           </div>
 
-          <div className="flex space-x-3 mt-4">
+          <div className="flex flex-wrap gap-3 mt-4">
             <button
               onClick={handleTest}
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 min-w-[120px] px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-center"
             >
               {isLoading ? '🔄 テスト中...' : '🧪 テスト'}
             </button>
@@ -167,9 +190,25 @@ const SettingsContainer = () => {
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 min-w-[120px] px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-center"
             >
               {isLoading ? '🔄 保存中...' : '💾 保存'}
+            </button>
+            
+            <button
+              onClick={handleShowKey}
+              disabled={isLoading}
+              className="flex-1 min-w-[120px] px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-center"
+            >
+              👁️ キー表示
+            </button>
+            
+            <button
+              onClick={handleClear}
+              disabled={isLoading}
+              className="flex-1 min-w-[120px] px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-center"
+            >
+              🗑️ クリア
             </button>
           </div>
 
