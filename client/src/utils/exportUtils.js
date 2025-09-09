@@ -47,6 +47,207 @@ export const exportToCSV = (diaries) => {
 };
 
 /**
+ * 日記データをDOCX形式（Word文書）でエクスポート
+ */
+export const exportToDOCX = (diaries) => {
+  if (!diaries || diaries.length === 0) {
+    alert('エクスポートする日記がありません。');
+    return;
+  }
+
+  // 気分の絵文字マップ
+  const getMoodEmoji = (mood) => {
+    const moodMap = {
+      '最高': '😄',
+      '良い': '😊',
+      'まあまあ': '😐',
+      '悪い': '😞',
+      '最悪': '😢'
+    };
+    return moodMap[mood] || '😐';
+  };
+
+  // 天気の絵文字マップ
+  const getWeatherEmoji = (weather) => {
+    if (!weather) return '';
+    const weatherMap = {
+      '晴れ': '☀️',
+      '曇り': '☁️',
+      '雨': '🌧️',
+      '雪': '❄️',
+      '台風': '🌪️'
+    };
+    return weatherMap[weather] || '🌤️';
+  };
+
+  // Word文書用のHTML構造を作成
+  const docxHtml = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>AI日記 - ${new Date().toLocaleDateString('ja-JP')}</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>90</w:Zoom>
+<w:DoNotPromptForConvert/>
+<w:DoNotShowRevisions/>
+<w:DoNotPrintRevisions/>
+<w:DisplayHorizontalDrawingGridEvery>0</w:DisplayHorizontalDrawingGridEvery>
+<w:DisplayVerticalDrawingGridEvery>2</w:DisplayVerticalDrawingGridEvery>
+<w:CreateBackup/>
+<w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+<w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+<w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+<w:Compatibility>
+<w:BreakWrappedTables/>
+<w:SnapToGridInCell/>
+<w:WrapTextWithPunct/>
+<w:UseAsianBreakRules/>
+<w:DontGrowAutofit/>
+</w:Compatibility>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+/* Word互換のスタイル定義 */
+@page {
+  margin: 2.54cm;
+  size: A4;
+}
+body {
+  font-family: 'MS Mincho', 'MS Gothic', 'Hiragino Sans', serif;
+  font-size: 12pt;
+  line-height: 1.8;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+.header {
+  text-align: center;
+  border-bottom: 3pt solid #4472c4;
+  padding-bottom: 20pt;
+  margin-bottom: 30pt;
+}
+.header h1 {
+  font-size: 24pt;
+  font-weight: bold;
+  color: #4472c4;
+  margin: 0;
+}
+.header p {
+  font-size: 12pt;
+  color: #666;
+  margin: 10pt 0 0 0;
+}
+.diary-entry {
+  page-break-inside: avoid;
+  margin-bottom: 30pt;
+  border: 1pt solid #d0d7de;
+  padding: 20pt;
+  background: #f6f8fa;
+}
+.diary-title {
+  font-size: 16pt;
+  font-weight: bold;
+  color: #24292f;
+  margin: 0 0 10pt 0;
+}
+.diary-meta {
+  font-size: 11pt;
+  color: #656d76;
+  margin-bottom: 15pt;
+  border-bottom: 1pt solid #d0d7de;
+  padding-bottom: 10pt;
+}
+.diary-content {
+  font-size: 12pt;
+  line-height: 2;
+  white-space: pre-wrap;
+  margin-bottom: 15pt;
+  text-align: justify;
+}
+.diary-tags {
+  font-size: 10pt;
+  color: #0969da;
+  font-style: italic;
+}
+.summary {
+  margin-top: 30pt;
+  padding: 15pt;
+  background: #f6f8fa;
+  border: 1pt solid #d0d7de;
+  text-align: center;
+}
+.page-break {
+  page-break-after: always;
+}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>📓 AI日記</h1>
+    <p>エクスポート日: ${new Date().toLocaleDateString('ja-JP', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric', 
+      weekday: 'long' 
+    })} | 合計: ${diaries.length}件</p>
+  </div>
+
+  ${diaries.map((diary, index) => `
+    <div class="diary-entry">
+      <div class="diary-title">${diary.title || '無題の日記'}</div>
+      <div class="diary-meta">
+        📅 ${new Date(diary.date).toLocaleDateString('ja-JP', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric', 
+          weekday: 'long' 
+        })} | 
+        ${getMoodEmoji(diary.mood)} ${diary.mood || 'まあまあ'}${diary.weather ? ` | ${getWeatherEmoji(diary.weather)} ${diary.weather}` : ''}${diary.generated ? ' | 🤖 AI生成' : ''}
+      </div>
+      <div class="diary-content">${(diary.content || '').replace(/\n/g, '<br/>')}</div>
+      ${diary.tags && diary.tags.length > 0 ? `
+        <div class="diary-tags">
+          タグ: ${diary.tags.map(tag => `#${tag}`).join(', ')}
+        </div>
+      ` : ''}
+    </div>
+    ${index < diaries.length - 1 ? '<div class="page-break"></div>' : ''}
+  `).join('')}
+
+  <div class="summary">
+    <p><strong>📊 統計情報</strong></p>
+    <p>総日記数: ${diaries.length}件 | AI生成: ${diaries.filter(d => d.generated).length}件 | 手動作成: ${diaries.filter(d => !d.generated).length}件</p>
+  </div>
+</body>
+</html>`;
+
+  // BOMを追加してWord文書として保存
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + docxHtml], { 
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8' 
+  });
+  
+  // ダウンロード
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `AI日記_${new Date().toISOString().split('T')[0]}.docx`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  console.log(`📄 ${diaries.length}件の日記をDOCX（Word形式）でエクスポートしました`);
+};
+
+/**
  * モバイルデバイス判定
  */
 const isMobile = () => {

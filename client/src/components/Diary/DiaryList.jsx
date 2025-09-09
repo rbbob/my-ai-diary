@@ -1,5 +1,5 @@
 import React from 'react';
-import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF, exportToDOCX } from '../../utils/exportUtils';
 
 const DiaryList = ({ diaries, onEdit, onDelete }) => {
   const formatDate = (dateStr) => {
@@ -92,6 +92,14 @@ const DiaryList = ({ diaries, onEdit, onDelete }) => {
             >
               <span className="mr-1">📄</span>
               PDF
+            </button>
+            <button
+              onClick={() => exportToDOCX(diaries)}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center"
+              title="Word文書（DOCX）でエクスポート"
+            >
+              <span className="mr-1">📝</span>
+              Word
             </button>
           </div>
         )}
