@@ -1,4 +1,5 @@
 import React from 'react';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 
 const DiaryList = ({ diaries, onEdit, onDelete }) => {
   const formatDate = (dateStr) => {
@@ -73,6 +74,27 @@ const DiaryList = ({ diaries, onEdit, onDelete }) => {
             クリックして詳細を確認・編集できます
           </p>
         </div>
+        
+        {diaries.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => exportToCSV(diaries)}
+              className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors flex items-center"
+              title="CSVファイルでエクスポート"
+            >
+              <span className="mr-1">📊</span>
+              CSV
+            </button>
+            <button
+              onClick={() => exportToPDF(diaries)}
+              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors flex items-center"
+              title="PDFファイルでエクスポート"
+            >
+              <span className="mr-1">📄</span>
+              PDF
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
