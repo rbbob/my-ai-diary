@@ -199,8 +199,8 @@ const DiaryContainer = () => {
                     : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <span className="mr-2">📋</span>
-                リスト表示
+                <span className="mr-2">📝</span>
+                日記一覧
               </button>
               <button
                 onClick={() => setView('calendar')}
@@ -211,7 +211,7 @@ const DiaryContainer = () => {
                 }`}
               >
                 <span className="mr-2">📅</span>
-                カレンダー表示
+                カレンダー
               </button>
             </div>
 
