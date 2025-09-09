@@ -94,7 +94,7 @@ const DiaryList = ({ diaries, onEdit, onDelete }) => {
               PDF
             </button>
             <button
-              onClick={() => exportToDOCX(diaries)}
+              onClick={async () => await exportToDOCX(diaries)}
               className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center"
               title="Word文書（DOCX）でエクスポート"
             >
