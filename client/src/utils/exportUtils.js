@@ -47,6 +47,14 @@ export const exportToCSV = (diaries) => {
 };
 
 /**
+ * モバイルデバイス判定
+ */
+const isMobile = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         (window.innerWidth <= 768);
+};
+
+/**
  * 日記データをPDF形式でエクスポート（HTML to PDF）
  */
 export const exportToPDF = (diaries) => {
@@ -80,23 +88,78 @@ export const exportToPDF = (diaries) => {
     return weatherMap[weather] || '🌤️';
   };
 
+  // モバイル用の追加スタイル
+  const mobileStyles = isMobile() ? `
+    .mobile-instructions {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: #4f46e5;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .mobile-instructions button {
+      background: white;
+      color: #4f46e5;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    body {
+      padding-top: 80px;
+      font-size: 14px;
+    }
+    @media print {
+      .mobile-instructions {
+        display: none;
+      }
+      body {
+        padding-top: 0;
+      }
+    }
+  ` : '';
+
+  // モバイル用の指示
+  const mobileInstructions = isMobile() ? `
+    <div class="mobile-instructions">
+      <p>📱 モバイル版PDF保存方法</p>
+      <p>1. 画面右上の「共有」ボタンをタップ<br/>
+      2. 「PDFを作成」または「印刷」を選択<br/>
+      3. 「PDFとして保存」をタップ</p>
+      <button onclick="window.print()">🖨️ 印刷画面を開く</button>
+      <button onclick="window.close()">✕ 閉じる</button>
+    </div>
+  ` : '';
+
   // HTML テンプレート作成
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="ja">
     <head>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>AI日記 - ${new Date().toLocaleDateString('ja-JP')}</title>
       <style>
         @page {
-          margin: 20mm;
+          margin: 15mm;
           size: A4;
         }
         body {
-          font-family: 'MS Gothic', 'Hiragino Sans', sans-serif;
+          font-family: 'MS Gothic', 'Hiragino Sans', 'Arial', sans-serif;
           line-height: 1.6;
           color: #333;
           background: white;
+          margin: 0;
+          padding: 10px;
         }
         .header {
           text-align: center;
@@ -169,9 +232,25 @@ export const exportToPDF = (diaries) => {
           border-radius: 8px;
           text-align: center;
         }
+        ${mobileStyles}
+        @media (max-width: 768px) {
+          .diary-entry {
+            padding: 15px;
+            margin-bottom: 20px;
+          }
+          .diary-meta {
+            flex-direction: column;
+            gap: 5px;
+          }
+          .header h1 {
+            font-size: 20px;
+          }
+        }
       </style>
     </head>
     <body>
+      ${mobileInstructions}
+      
       <div class="header">
         <h1>📓 AI日記</h1>
         <p>エクスポート日: ${new Date().toLocaleDateString('ja-JP')} | 合計: ${diaries.length}件</p>
@@ -201,23 +280,32 @@ export const exportToPDF = (diaries) => {
         <p><strong>📊 統計情報</strong></p>
         <p>総日記数: ${diaries.length}件 | AI生成: ${diaries.filter(d => d.generated).length}件 | 手動作成: ${diaries.filter(d => !d.generated).length}件</p>
       </div>
+
+      <script>
+        // モバイルの場合は自動で印刷ダイアログを表示しない
+        if (!${isMobile()}) {
+          window.onload = () => {
+            setTimeout(() => {
+              window.print();
+            }, 1000);
+          };
+          window.onafterprint = () => {
+            window.close();
+          };
+        }
+      </script>
     </body>
     </html>
   `;
 
-  // 新しいウィンドウで印刷ダイアログを開く
+  // 新しいウィンドウで表示
   const printWindow = window.open('', '_blank');
   printWindow.document.write(htmlContent);
   printWindow.document.close();
-  
-  // PDF印刷を実行
-  printWindow.onload = () => {
-    printWindow.print();
-    // 印刷後にウィンドウを閉じる
-    printWindow.onafterprint = () => {
-      printWindow.close();
-    };
-  };
 
-  console.log(`📄 ${diaries.length}件の日記をPDFでエクスポートしました`);
+  if (isMobile()) {
+    console.log(`📱 モバイル版PDF表示: ${diaries.length}件の日記`);
+  } else {
+    console.log(`📄 ${diaries.length}件の日記をPDFでエクスポートしました`);
+  }
 };
