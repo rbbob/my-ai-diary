@@ -9,7 +9,7 @@ const router = express.Router();
  */
 router.post('/generate', async (req, res) => {
   try {
-    const { messages, date } = req.body;
+    const { messages, date, apiKey, model } = req.body;
 
     // バリデーション
     if (!messages || !Array.isArray(messages)) {
@@ -39,6 +39,14 @@ router.post('/generate', async (req, res) => {
       return res.status(400).json({
         error: '日記を生成するためのチャット履歴がありません。'
       });
+    }
+
+    // 動的なAPIキーとモデルを設定
+    if (apiKey) {
+      global.getDynamicApiKey = () => apiKey;
+    }
+    if (model) {
+      global.getDynamicModel = () => model;
     }
 
     // 日記を生成

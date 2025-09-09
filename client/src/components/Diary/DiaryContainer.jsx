@@ -46,6 +46,10 @@ const DiaryContainer = () => {
         return;
       }
 
+      // LocalStorageからAPIキー設定を取得
+      const apiKey = localStorage.getItem('openai_api_key');
+      const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+
       // 指定された日付で日記生成API呼び出し
       const response = await fetch('/api/diary/generate', {
         method: 'POST',
@@ -54,7 +58,9 @@ const DiaryContainer = () => {
         },
         body: JSON.stringify({
           messages: messages,
-          date: targetDate
+          date: targetDate,
+          apiKey: apiKey,
+          model: model
         }),
       });
 
