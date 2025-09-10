@@ -18,7 +18,10 @@
       "Bash(PORT=3005 npm run dev)",
       "Bash(git remote remove:*)",
       "Bash(git remote add:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(node:*)",
+      "Bash(dir)",
+      "Bash(printf '\\n')"
     ],
     "deny": [],
     "ask": []

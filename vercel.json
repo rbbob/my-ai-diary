@@ -1,9 +1,12 @@
 {
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
-  "installCommand": "cd client && npm install && cd ../api && npm install",
+  "installCommand": "cd client && npm install",
   "functions": {
     "api/*.js": {
+      "maxDuration": 30
+    },
+    "api/*/*.js": {
       "maxDuration": 30
     }
   },

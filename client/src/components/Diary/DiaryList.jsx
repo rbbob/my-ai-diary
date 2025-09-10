@@ -2,6 +2,11 @@ import React from 'react';
 import { exportToCSV, exportToPDF, exportToDOCX } from '../../utils/exportUtils';
 
 const DiaryList = ({ diaries, onEdit, onDelete }) => {
+  // diariesの変化を監視（デバッグ用）
+  React.useEffect(() => {
+    console.log('📋 DiaryList: 日記データが更新されました');
+    console.log(`   - 日記件数: ${diaries ? diaries.length : 0}件`);
+  }, [diaries]);
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ja-JP', {

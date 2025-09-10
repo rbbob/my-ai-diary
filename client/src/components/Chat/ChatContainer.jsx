@@ -166,10 +166,11 @@ const ChatContainer = () => {
       const apiKey = localStorage.getItem('openai_api_key');
       const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
 
-      const data = await fetchWithRetry('/api/chat', {
+      console.log('🔍 Sending chat request:', messageText);
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
         },
         body: JSON.stringify({
           message: messageText,
@@ -178,6 +179,13 @@ const ChatContainer = () => {
           model: model
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Chat response received:', data);
       
       // AIレスポンスを追加
       const aiMessage = {

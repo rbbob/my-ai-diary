@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const DiaryEditor = ({ diary, isNew, onSave, onCancel }) => {
+const DiaryEditor = ({ diary, isNew, onSave, onCancel, onRegenerate }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -234,20 +234,33 @@ const DiaryEditor = ({ diary, isNew, onSave, onCancel }) => {
         </div>
 
         {/* ボタン */}
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            キャンセル
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            {isNew ? '✅ 保存' : '💾 更新'}
-          </button>
+        <div className="flex justify-between">
+          <div>
+            {!isNew && onRegenerate && (
+              <button
+                type="button"
+                onClick={() => onRegenerate(diary?.date)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+              >
+                🔄 最新チャットで再生成
+              </button>
+            )}
+          </div>
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              {isNew ? '✅ 保存' : '💾 更新'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

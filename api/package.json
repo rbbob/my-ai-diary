@@ -4,7 +4,8 @@
   "description": "AI Diary App API Functions for Vercel",
   "main": "chat.js",
   "dependencies": {
-    "openai": "^4.20.1"
+    "openai": "^4.20.1",
+    "dotenv": "^16.3.1"
   },
   "engines": {
     "node": ">=18.0.0"

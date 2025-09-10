@@ -32,7 +32,17 @@ router.post('/generate', async (req, res) => {
       });
     }
 
+    // 文字エンコーディングデバッグログ
     console.log(`📝 Diary generation request for date: ${date}, messages: ${messages.length}`);
+    console.log('📋 Message encoding debug:');
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index}:`, {
+        isUser: msg.isUser,
+        textLength: msg.text ? msg.text.length : 0,
+        textPreview: msg.text ? msg.text.substring(0, 50) : 'N/A',
+        encoding: Buffer.from(msg.text || '', 'utf8').toString('hex').substring(0, 100)
+      });
+    });
 
     // メッセージが空の場合
     if (messages.length === 0) {
@@ -40,6 +50,17 @@ router.post('/generate', async (req, res) => {
         error: '日記を生成するためのチャット履歴がありません。'
       });
     }
+
+    // メッセージの文字エンコーディング問題を修正
+    const cleanedMessages = messages.map(msg => ({
+      ...msg,
+      text: msg.text ? msg.text.replace(/[\x00-\x1F\x7F-\x9F]/g, '') : msg.text
+    })).filter(msg => msg.text && msg.text.trim().length > 0);
+
+    console.log('🧹 Cleaned messages:', cleanedMessages.length);
+    cleanedMessages.forEach((msg, index) => {
+      console.log(`Clean Message ${index}: ${msg.text.substring(0, 50)}`);
+    });
 
     // 動的なAPIキーとモデルを設定
     if (apiKey) {
@@ -49,8 +70,8 @@ router.post('/generate', async (req, res) => {
       global.getDynamicModel = () => model;
     }
 
-    // 日記を生成
-    const result = await generateDiaryFromChat(messages, date);
+    // 日記を生成（清浄化したメッセージを使用）
+    const result = await generateDiaryFromChat(cleanedMessages, date);
 
     if (!result.success) {
       return res.status(400).json({

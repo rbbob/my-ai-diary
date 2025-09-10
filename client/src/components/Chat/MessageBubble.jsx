@@ -3,13 +3,37 @@ import React from 'react';
 const MessageBubble = ({ message }) => {
   const { text, isUser, timestamp } = message;
   
-  // 時刻フォーマット
-  const formatTime = (isoString) => {
+  // 日時フォーマット
+  const formatDateTime = (isoString) => {
     const date = new Date(isoString);
-    return date.toLocaleTimeString('ja-JP', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // 日付が今日の場合は時刻のみ
+    if (date.toDateString() === today.toDateString()) {
+      return date.toLocaleTimeString('ja-JP', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+    // 日付が昨日の場合
+    else if (date.toDateString() === yesterday.toDateString()) {
+      return `昨日 ${date.toLocaleTimeString('ja-JP', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })}`;
+    }
+    // それ以外は日付と時刻
+    else {
+      return date.toLocaleDateString('ja-JP', {
+        month: 'short',
+        day: 'numeric'
+      }) + ' ' + date.toLocaleTimeString('ja-JP', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
   };
 
   return (
@@ -36,7 +60,7 @@ const MessageBubble = ({ message }) => {
         <div className={`text-xs mt-1 ${
           isUser ? 'text-indigo-200' : 'text-gray-400'
         }`}>
-          {formatTime(timestamp)}
+          {formatDateTime(timestamp)}
         </div>
       </div>
     </div>

@@ -33,7 +33,7 @@ const APIStatus = () => {
       const localModel = localStorage.getItem('openai_model') || 'gpt-4o-mini';
       
       // LocalStorageにAPIキーがある場合は、それをサーバーに送信してチェック
-      if (localApiKey && localApiKey.startsWith('sk-')) {
+      if (localApiKey && localApiKey.trim() !== '' && localApiKey.startsWith('sk-')) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒タイムアウト
 
@@ -68,6 +68,14 @@ const APIStatus = () => {
       }
 
       // LocalStorageにAPIキーがない場合はサーバーのヘルスチェック
+      // まずAPIキーが設定されていないことを明示的に設定
+      setApiStatus({
+        status: 'online',
+        openai_configured: false,
+        model: null,
+        error: null
+      });
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -87,8 +95,8 @@ const APIStatus = () => {
         console.log('✅ API Status check successful:', data);
         setApiStatus({
           status: 'online',
-          openai_configured: data.openai_configured,
-          model: data.model,
+          openai_configured: data.openai_configured || false,
+          model: data.model || null,
           error: null
         });
       } else {

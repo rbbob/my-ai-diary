@@ -8,21 +8,47 @@ const DiaryContainer = () => {
   const [selectedDiary, setSelectedDiary] = useState(null);
   const [view, setView] = useState('calendar'); // 'list', 'calendar', 'edit', 'create'
   const [selectedDate, setSelectedDate] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0); // 強制更新用
 
   useEffect(() => {
     loadDiaries();
+    
+    // LocalStorageの変更を監視（他のタブでの変更も検知）
+    const handleStorageChange = (e) => {
+      if (e.key === 'diary_entries') {
+        console.log('🔄 LocalStorageの日記データが変更されました - 自動更新中...');
+        loadDiaries();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
-  const loadDiaries = () => {
-    const savedDiaries = localStorage.getItem('diary_entries');
-    if (savedDiaries) {
-      try {
+  const loadDiaries = async () => {
+    console.log('🔄 日記一覧を更新中...', new Date().toLocaleTimeString());
+    try {
+      const savedDiaries = localStorage.getItem('diary_entries');
+      if (savedDiaries) {
         const parsed = JSON.parse(savedDiaries);
-        setDiaries(Array.isArray(parsed) ? parsed : []);
-      } catch (error) {
-        console.error('Error loading diaries:', error);
+        const diaryArray = Array.isArray(parsed) ? parsed : [];
+        console.log(`📚 ${diaryArray.length}件の日記を読み込みました`, diaryArray);
+        // 日付順にソート（新しいものから）
+        const sortedDiaries = diaryArray.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+        setDiaries([...sortedDiaries]); // 新しい配列を作成して確実に更新
+        setRefreshKey(prev => prev + 1); // 強制再レンダリング
+      } else {
+        console.log('📝 保存された日記がありません');
         setDiaries([]);
+        setRefreshKey(prev => prev + 1);
       }
+    } catch (error) {
+      console.error('日記の読み込みエラー:', error);
+      setDiaries([]);
+      setRefreshKey(prev => prev + 1);
     }
   };
 
@@ -54,7 +80,7 @@ const DiaryContainer = () => {
       const response = await fetch('/api/diary/generate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
         },
         body: JSON.stringify({
           messages: messages,
@@ -125,6 +151,20 @@ const DiaryContainer = () => {
     setView('edit');
   };
 
+  const handleRegenerateDiary = async (date) => {
+    const confirmRegenerate = confirm(`${date}の日記を最新のチャット内容で再生成しますか？\n\n現在の内容は失われます。`);
+    if (confirmRegenerate) {
+      // 既存の日記を削除
+      const updatedDiaries = diaries.filter(d => d.date !== date);
+      saveDiaries(updatedDiaries);
+      // 新しい日記を生成
+      await generateDiaryForDate(date);
+      // カレンダー表示に戻る
+      setView('calendar');
+      setSelectedDiary(null);
+    }
+  };
+
 
   const handleBackToList = () => {
     setView('calendar');
@@ -137,11 +177,11 @@ const DiaryContainer = () => {
     // その日の日記があるかチェック
     const diaryForDate = diaries.find(d => d.date === date);
     if (diaryForDate) {
-      // 既存の日記は編集
+      // 既存の日記がある場合は編集画面に移動（編集画面に再生成ボタンを追加予定）
       setSelectedDiary(diaryForDate);
       setView('edit');
     } else {
-      // 日記がない場合は、その日付でAI日記を自動生成
+      // 新しい日記を生成
       await generateDiaryForDate(date);
     }
   };
@@ -164,11 +204,13 @@ const DiaryContainer = () => {
             isNew={view === 'create'}
             onSave={handleSaveDiary}
             onCancel={handleBackToList}
+            onRegenerate={handleRegenerateDiary}
           />
         );
       default:
         return (
           <DiaryList
+            key={refreshKey}
             diaries={diaries}
             onEdit={handleEditDiary}
             onDelete={handleDeleteDiary}
