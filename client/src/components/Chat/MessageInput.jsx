@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import VoiceInputButton from './VoiceInputButton';
 
 const MessageInput = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState('');
+  const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+  const voiceInputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
       onSendMessage(message);
       setMessage('');
+      setIsManuallyEdited(false); // 手動編集フラグをリセット
+      // 音声入力の状態もクリア
+      if (voiceInputRef.current) {
+        voiceInputRef.current.clearVoiceInput();
+      }
     }
   };
 
@@ -18,12 +26,31 @@ const MessageInput = ({ onSendMessage, isLoading }) => {
     }
   };
 
+  const handleVoiceTranscript = (transcript) => {
+    if (!isManuallyEdited) {
+      setMessage(transcript);
+    }
+  };
+
+  const handleVoiceStart = () => {
+    setIsManuallyEdited(false); // 音声入力開始時にフラグをリセット
+  };
+
+  const handleManualChange = (e) => {
+    setMessage(e.target.value);
+    setIsManuallyEdited(true); // 手動編集フラグを設定
+    // 音声入力を停止
+    if (voiceInputRef.current) {
+      voiceInputRef.current.clearVoiceInput();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex items-end space-x-3">
       <div className="flex-1">
         <textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleManualChange}
           onKeyPress={handleKeyPress}
           placeholder="メッセージを入力してください..."
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
@@ -40,6 +67,14 @@ const MessageInput = ({ onSendMessage, isLoading }) => {
           </span>
         </div>
       </div>
+      
+      {/* 音声入力ボタン */}
+      <VoiceInputButton 
+        ref={voiceInputRef}
+        onTranscript={handleVoiceTranscript} 
+        onStart={handleVoiceStart}
+        disabled={isLoading} 
+      />
       
       <button
         type="submit"
