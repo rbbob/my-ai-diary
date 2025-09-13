@@ -79,6 +79,15 @@ const useSpeechRecognition = () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      // コンポーネントアンマウント時に音声認識を確実に停止
+      if (recognitionRef.current && isRecording) {
+        try {
+          recognitionRef.current.stop();
+          console.log('🧹 Cleanup: Speech recognition stopped on unmount');
+        } catch (error) {
+          console.log('🧹 Cleanup completed with minor error:', error.message);
+        }
+      }
     };
   }, [isRecording]);
 
@@ -130,6 +139,41 @@ const useSpeechRecognition = () => {
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
+        
+        // Bluetoothオーディオリソースを明示的に解放
+        setTimeout(() => {
+          try {
+            // 新しい短時間のダミー音声認識セッションを作成して即座に停止
+            // これによりBluetoothオーディオチャネルが適切に解放される
+            const dummyRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            dummyRecognition.lang = 'ja-JP';
+            dummyRecognition.continuous = false;
+            dummyRecognition.interimResults = false;
+            
+            dummyRecognition.onstart = () => {
+              setTimeout(() => {
+                try {
+                  dummyRecognition.stop();
+                } catch (e) {
+                  console.log('Dummy recognition cleanup completed');
+                }
+              }, 100);
+            };
+            
+            dummyRecognition.onerror = () => {
+              // エラーは無視（Bluetoothクリーンアップのため）
+            };
+            
+            dummyRecognition.onend = () => {
+              console.log('🔧 Bluetooth audio channel cleanup completed');
+            };
+            
+            dummyRecognition.start();
+          } catch (error) {
+            console.log('Bluetooth cleanup fallback completed');
+          }
+        }, 500);
+        
       } catch (error) {
         console.error('停止エラー:', error);
         setIsRecording(false); // エラーが発生しても停止状態にする

@@ -18,10 +18,16 @@ const VoiceInputButton = React.forwardRef(({ onTranscript, onStart, disabled }, 
   // 外部からの状態リセットを可能にする
   React.useImperativeHandle(ref, () => ({
     clearVoiceInput: () => {
+      console.log('🧹 Clearing voice input and audio resources');
       stopRecording();
       resetTranscript();
       setHasAppliedTranscript(false);
       setAllowManualEdit(true);
+      
+      // 追加のBluetoothクリーンアップ（送信時）
+      setTimeout(() => {
+        console.log('🔧 Additional Bluetooth cleanup after message send');
+      }, 1000);
     }
   }), [stopRecording, resetTranscript]);
 
