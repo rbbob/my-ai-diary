@@ -59,6 +59,13 @@ const DiaryContainer = () => {
 
   const generateDiaryForDate = async (targetDate) => {
     try {
+      // 既に同じ日付の日記があるかチェック
+      const existingDiary = diaries.find(d => d.date === targetDate);
+      if (existingDiary) {
+        alert(`${targetDate}の日記は既に存在します。編集画面から「最新チャットで再生成」ボタンを使用してください。`);
+        return;
+      }
+
       // チャット履歴を取得
       const chatMessages = localStorage.getItem('chat_messages');
       if (!chatMessages) {
@@ -72,9 +79,24 @@ const DiaryContainer = () => {
         return;
       }
 
+      // 指定された日付に関連するメッセージがあるかチェック
+      const targetDateObj = new Date(targetDate);
+      const relevantMessages = messages.filter(msg => {
+        if (!msg.timestamp) return false;
+        const msgDate = new Date(msg.timestamp);
+        return msgDate.toDateString() === targetDateObj.toDateString();
+      });
+
+      if (relevantMessages.length === 0) {
+        alert(`${targetDate}のチャット履歴が見つかりません。\n\n該当日にチャットを行ってから日記を生成してください。\n\n※日記生成には当日のチャット内容が必要です。`);
+        return;
+      }
+
       // LocalStorageからAPIキー設定を取得
       const apiKey = localStorage.getItem('openai_api_key');
       const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+
+      console.log(`📝 Generating diary for ${targetDate} with ${messages.length} total messages, ${relevantMessages.length} relevant messages`);
 
       // 指定された日付で日記生成API呼び出し
       const response = await fetch('/api/diary/generate', {

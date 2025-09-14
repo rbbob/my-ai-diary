@@ -162,14 +162,53 @@ export async function generateDiaryFromChat(messages, date) {
   }
 
   try {
-    // チャットメッセージから内容を抽出
-    const chatContent = messages
+    // 指定された日付のメッセージのみを厳密にフィルタリング
+    const targetDate = new Date(date + 'T00:00:00');
+    const nextDate = new Date(targetDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+    
+    console.log(`🎯 Target date: ${date}`);
+    console.log(`📅 Target date range: ${targetDate.toISOString()} to ${nextDate.toISOString()}`);
+    
+    // メッセージを日付でフィルタリング（同日のメッセージのみ）
+    const relevantMessages = messages.filter(msg => {
+      if (!msg.timestamp) return false;
+      const msgDate = new Date(msg.timestamp);
+      const isRelevant = msgDate >= targetDate && msgDate < nextDate;
+      if (isRelevant) {
+        console.log(`✅ Relevant message: ${msgDate.toISOString()} - ${msg.text?.substring(0, 50)}...`);
+      }
+      return isRelevant;
+    });
+
+    console.log(`📋 Filtering messages for date ${date}:`);
+    console.log(`📊 Total messages: ${messages.length}`);
+    console.log(`📊 Relevant messages for ${date}: ${relevantMessages.length}`);
+
+    // 該当日のメッセージがない場合はエラーを返す
+    if (relevantMessages.length === 0) {
+      return {
+        success: false,
+        error: `${date}のチャット履歴が見つかりません。該当日にチャットを行ってから日記を生成してください。`
+      };
+    }
+
+    // 当日のメッセージのみを使用
+    let messagesToUse = relevantMessages;
+
+    // チャットメッセージから内容を抽出（タイムスタンプ付き）
+    const chatContent = messagesToUse
       .filter(msg => msg.text && msg.text.trim())
-      .map(msg => `${msg.isUser ? 'ユーザー' : 'AI'}: ${msg.text}`)
+      .map(msg => {
+        const timestamp = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('ja-JP') : '時刻不明';
+        return `[${timestamp}] ${msg.isUser ? 'ユーザー' : 'AI'}: ${msg.text}`;
+      })
       .join('\n');
 
-    console.log('📋 Extracted chat content:', chatContent);
-    console.log('📊 Message count:', messages.length);
+    console.log('📋 Extracted chat content for', date);
+    console.log('📊 Message count used:', messagesToUse.length);
+    console.log('🕐 Time range:', messagesToUse.length > 0 ? 
+      `${new Date(messagesToUse[0].timestamp).toLocaleString()} - ${new Date(messagesToUse[messagesToUse.length-1].timestamp).toLocaleString()}` : 'No messages');
 
     if (!chatContent.trim()) {
       return {
@@ -178,27 +217,26 @@ export async function generateDiaryFromChat(messages, date) {
       };
     }
 
-    const systemPrompt = `あなたは日記作成のエキスパートです。以下のチャット履歴を基に、ユーザーが実際に話した内容や体験をそのまま活用して日記を作成してください。
+    const systemPrompt = `あなたは日記作成のエキスパートです。${date}の日記を作成してください。
 
-**重要な指示：**
-- チャット履歴の内容を正確に反映する
-- ユーザーが話した具体的な出来事、感情、体験をそのまま使用する
-- 創作や想像で内容を変更しないこと
-- チャット内容がない場合のみフォールバック内容を使用する
+**最重要指示：**
+- 以下のチャット履歴は${date}当日のもののみです
+- 他の日の内容は一切含まれていません
+- ${date}当日の内容のみを使用して日記を作成してください
+- 過去の日記の内容を推測したり含めたりしないでください
 
-**要件:**
-1. 日記は一人称で書く
-2. チャット履歴に出てきた具体的な出来事をそのまま記載
-3. ユーザーの言葉や感情表現をできる限り保持
-4. 自然な日記の形式に整理する
-5. JSON形式で返す: {"title": "日記タイトル", "content": "日記本文", "mood": "気分(最高/良い/まあまあ/悪い/最悪)", "weather": "天気(明記されていればそのまま、不明な場合はnull)"}
+**厳格な要件:**
+1. ${date}当日のチャット内容のみを使用
+2. 他の日付の内容は絶対に含めない
+3. 推測や想像での内容追加は禁止
+4. チャット履歴に基づいた事実のみ記載
+5. 日記は一人称で自然な文体に整理
+6. JSON形式で返答: {"title": "${date}の出来事", "content": "日記本文", "mood": "気分(最高/良い/まあまあ/悪い/最悪)", "weather": "天気(不明な場合はnull)", "tags": ["当日の活動に基づくタグ"]}
 
-**日付:** ${date}
-
-**チャット履歴:**
+**${date}当日のチャット履歴のみ:**
 ${chatContent}
 
-上記のチャット履歴から、ユーザーが実際に体験したことや話したことをベースに日記を作成してください。`;
+上記の${date}当日のチャット内容のみを使用して、その日の日記を作成してください。他の日の内容は含めないでください。`;
 
     // 動的OpenAIクライアントを取得
     const openai = getOpenAIClient();
@@ -210,7 +248,7 @@ ${chatContent}
         { role: 'system', content: systemPrompt }
       ],
       max_tokens: 1500,
-      temperature: 0.6,
+      temperature: 0.3,
       response_format: { type: "json_object" }
     });
 
@@ -221,8 +259,9 @@ ${chatContent}
       diary: {
         title: result.title || `${date}の日記`,
         content: result.content || 'チャット履歴から日記を生成できませんでした。',
-        mood: result.mood || '普通',
+        mood: result.mood || 'まあまあ',
         weather: result.weather || null,
+        tags: result.tags || [],
         date: date,
         createdAt: new Date().toISOString()
       }

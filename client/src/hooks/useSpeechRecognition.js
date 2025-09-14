@@ -8,6 +8,7 @@ const useSpeechRecognition = () => {
   
   const recognitionRef = useRef(null);
   const timeoutRef = useRef(null);
+  const mediaStreamRef = useRef(null);
 
   useEffect(() => {
     // Web Speech API対応チェック
@@ -119,8 +120,17 @@ const useSpeechRecognition = () => {
     }
 
     try {
-      // マイクへのアクセス許可をリクエスト
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // マイクへのアクセス許可をリクエストし、MediaStreamを明示的に管理
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      mediaStreamRef.current = stream;
+      console.log('🎤 MediaStream acquired for Bluetooth compatibility');
       
       setTranscript('');
       setError(null);
