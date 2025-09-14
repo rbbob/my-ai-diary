@@ -1,5 +1,5 @@
 // 環境変数を最初に読み込み
-const OpenAI = require('openai').default;
+const { OpenAI } = require('openai');
 
 // 動的OpenAIクライアントの取得
 function getOpenAIClient(providedApiKey = null) {

@@ -21,7 +21,9 @@
       "Bash(git branch:*)",
       "Bash(node:*)",
       "Bash(dir)",
-      "Bash(printf '\\n')"
+      "Bash(printf '\\n')",
+      "Bash(gh api:*)",
+      "Bash(PORT=3006 npm run dev)"
     ],
     "deny": [],
     "ask": []

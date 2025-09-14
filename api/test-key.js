@@ -1,4 +1,4 @@
-const OpenAI = require('openai').default;
+const { OpenAI } = require('openai');
 
 /**
  * Vercel サーバーレス関数: APIキーテスト
