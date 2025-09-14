@@ -1,19 +1,26 @@
 {
-  "buildCommand": "cd client && npm ci && npx vite build",
-  "outputDirectory": "client/dist",
-  "installCommand": "cd client && npm ci",
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 30
-    },
-    "api/*/*.js": {
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/$1"
     }
   ]
 }
