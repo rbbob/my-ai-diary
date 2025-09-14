@@ -24,6 +24,8 @@ const SettingsContainer = () => {
     setMessage('');
 
     try {
+      console.log('APIキー保存開始:', { model });
+      
       // サーバーにAPIキーを送信
       const response = await fetch('/api/config', {
         method: 'POST',
@@ -36,24 +38,29 @@ const SettingsContainer = () => {
         }),
       });
 
+      console.log('サーバーレスポンス:', response.status, response.ok);
+
       if (!response.ok) {
-        throw new Error('設定の保存に失敗しました');
+        const errorText = await response.text();
+        console.error('サーバーエラー:', errorText);
+        throw new Error(`設定の保存に失敗しました (${response.status}): ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('保存成功:', data);
 
       // LocalStorageに保存
       localStorage.setItem('openai_api_key', apiKey);
       localStorage.setItem('openai_model', model);
 
-      setMessage('設定を保存しました！');
+      setMessage('✅ 設定を保存しました！');
       
       // 3秒後にメッセージをクリア
       setTimeout(() => setMessage(''), 3000);
 
     } catch (error) {
       console.error('Settings Error:', error);
-      setMessage('設定の保存に失敗しました');
+      setMessage(`❌ 設定の保存に失敗しました: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +76,8 @@ const SettingsContainer = () => {
     setMessage('');
 
     try {
+      console.log('APIキーテスト開始:', { model });
+      
       // テスト用の軽量なAPI呼び出し
       const response = await fetch('/api/test-key', {
         method: 'POST',
@@ -81,21 +90,26 @@ const SettingsContainer = () => {
         }),
       });
 
+      console.log('テストレスポンス:', response.status, response.ok);
+
       if (!response.ok) {
-        throw new Error('APIキーのテストに失敗しました');
+        const errorText = await response.text();
+        console.error('テストサーバーエラー:', errorText);
+        throw new Error(`APIキーのテストに失敗しました (${response.status}): ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('テスト結果:', data);
       
       if (data.valid) {
         setMessage('✅ APIキーは有効です！');
       } else {
-        setMessage('❌ APIキーが無効です');
+        setMessage(`❌ APIキーが無効です: ${data.message || '不明なエラー'}`);
       }
       
     } catch (error) {
       console.error('Test Error:', error);
-      setMessage('❌ APIキーのテストに失敗しました');
+      setMessage(`❌ APIキーのテストに失敗しました: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
