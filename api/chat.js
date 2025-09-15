@@ -1,4 +1,4 @@
-const { generateChatResponse } = require('./openaiService');
+import { generateChatResponse } from './openaiService.js';
 
 /**
  * Vercel サーバーレス関数のメインハンドラ
@@ -68,5 +68,4 @@ async function handler(req, res) {
   }
 }
 
-module.exports = handler;
 export default handler;

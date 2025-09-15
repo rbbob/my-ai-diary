@@ -1,5 +1,5 @@
 // 環境変数を最初に読み込み
-const { OpenAI } = require('openai');
+import { OpenAI } from 'openai';
 
 // 動的OpenAIクライアントの取得
 function getOpenAIClient(providedApiKey = null) {
@@ -234,7 +234,7 @@ ${chatContent}
   }
 }
 
-module.exports = {
+export {
   isOpenAIAvailable,
   generateChatResponse,
   generateDiaryFromChat

@@ -1,4 +1,4 @@
-const { OpenAI } = require('openai');
+import { OpenAI } from 'openai';
 
 /**
  * Vercel サーバーレス関数: APIキーテスト
@@ -74,5 +74,4 @@ async function handler(req, res) {
   }
 }
 
-module.exports = handler;
 export default handler;

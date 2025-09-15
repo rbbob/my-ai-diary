@@ -1,4 +1,4 @@
-const { isOpenAIAvailable } = require('./openaiService');
+import { isOpenAIAvailable } from './openaiService.js';
 
 /**
  * ヘルスチェック用API
@@ -31,5 +31,4 @@ async function handler(req, res) {
   res.status(200).json(healthData);
 }
 
-module.exports = handler;
 export default handler;

@@ -1,4 +1,4 @@
-const { generateDiaryFromChat } = require('../openaiService');
+import { generateDiaryFromChat } from '../openaiService.js';
 
 /**
  * Vercel サーバーレス関数: 日記生成
@@ -78,5 +78,4 @@ async function handler(req, res) {
   }
 }
 
-module.exports = handler;
 export default handler;
