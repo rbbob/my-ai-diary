@@ -3,7 +3,7 @@ const { isOpenAIAvailable } = require('./openaiService');
 /**
  * ヘルスチェック用API
  */
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -29,4 +29,7 @@ module.exports = async function handler(req, res) {
   console.log('Health check:', healthData);
 
   res.status(200).json(healthData);
-};
+}
+
+module.exports = handler;
+export default handler;

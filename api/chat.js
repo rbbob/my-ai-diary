@@ -3,7 +3,7 @@ const { generateChatResponse } = require('./openaiService');
 /**
  * Vercel サーバーレス関数のメインハンドラ
  */
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -67,3 +67,6 @@ module.exports = async function handler(req, res) {
     });
   }
 }
+
+module.exports = handler;
+export default handler;

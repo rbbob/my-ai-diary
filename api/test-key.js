@@ -3,7 +3,7 @@ const { OpenAI } = require('openai');
 /**
  * Vercel サーバーレス関数: APIキーテスト
  */
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -72,4 +72,7 @@ module.exports = async function handler(req, res) {
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-};
+}
+
+module.exports = handler;
+export default handler;

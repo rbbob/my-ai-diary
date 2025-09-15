@@ -23,7 +23,8 @@
       "Bash(dir)",
       "Bash(printf '\\n')",
       "Bash(gh api:*)",
-      "Bash(PORT=3006 npm run dev)"
+      "Bash(PORT=3006 npm run dev)",
+      "Bash(del /Q apiindex.js)"
     ],
     "deny": [],
     "ask": []
