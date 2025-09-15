@@ -2,11 +2,9 @@
   "name": "ai-diary-api",
   "version": "1.0.0",
   "description": "AI Diary App API Functions for Vercel",
-  "type": "module",
-  "main": "chat.js",
+  "main": "hello.js",
   "dependencies": {
-    "openai": "^4.20.1",
-    "dotenv": "^16.3.1"
+    "openai": "^4.20.1"
   },
   "engines": {
     "node": ">=18.0.0"

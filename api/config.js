@@ -1,7 +1,7 @@
 /**
  * Vercel サーバーレス関数: 設定保存
  */
-async function handler(req, res) {
+export default function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -50,5 +50,3 @@ async function handler(req, res) {
     });
   }
 }
-
-export default handler;

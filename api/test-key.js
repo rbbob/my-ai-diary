@@ -1,9 +1,7 @@
-import { OpenAI } from 'openai';
-
 /**
  * Vercel サーバーレス関数: APIキーテスト
  */
-async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -28,6 +26,9 @@ async function handler(req, res) {
         error: '無効なAPIキー形式です'
       });
     }
+
+    // 動的にOpenAIをインポート
+    const { OpenAI } = await import('openai');
 
     // OpenAI クライアントを作成
     const openai = new OpenAI({
@@ -73,5 +74,3 @@ async function handler(req, res) {
     });
   }
 }
-
-export default handler;
