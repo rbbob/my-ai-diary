@@ -84,7 +84,10 @@ const DiaryContainer = () => {
       const relevantMessages = messages.filter(msg => {
         if (!msg.timestamp) return false;
         const msgDate = new Date(msg.timestamp);
-        return msgDate.toDateString() === targetDateObj.toDateString();
+        // より厳密な日付比較
+        return msgDate.getFullYear() === targetDateObj.getFullYear() &&
+               msgDate.getMonth() === targetDateObj.getMonth() &&
+               msgDate.getDate() === targetDateObj.getDate();
       });
 
       if (relevantMessages.length === 0) {
@@ -97,15 +100,20 @@ const DiaryContainer = () => {
       const model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
 
       console.log(`📝 Generating diary for ${targetDate} with ${messages.length} total messages, ${relevantMessages.length} relevant messages`);
+      console.log('📋 Relevant messages for diary generation:', relevantMessages.map(msg => ({
+        timestamp: msg.timestamp,
+        text: msg.text?.substring(0, 50) + '...',
+        isUser: msg.isUser
+      })));
 
-      // 指定された日付で日記生成API呼び出し
+      // 指定された日付で日記生成API呼び出し（当日のメッセージのみ送信）
       const response = await fetch('/api/diary/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
         body: JSON.stringify({
-          messages: messages,
+          messages: relevantMessages, // 当日のメッセージのみ
           date: targetDate,
           apiKey: apiKey,
           model: model
