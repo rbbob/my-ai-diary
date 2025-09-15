@@ -5,15 +5,9 @@ import APIStatus from './APIStatus';
 import ErrorBoundary from './ErrorBoundary';
 
 const ChatContainer = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "こんにちは！AI日記アプリへようこそ。今日はどんな一日でしたか？",
-      isUser: false,
-      timestamp: new Date().toISOString()
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef(null);
 
   // グローバルエラーハンドラーを追加
@@ -62,26 +56,70 @@ const ChatContainer = () => {
     };
   }, []);
 
-  // メッセージをLocalStorageに保存
-  const saveMessages = (messagesToSave) => {
-    localStorage.setItem('chat_messages', JSON.stringify(messagesToSave));
-    setMessages(messagesToSave);
+  // メッセージの重複をチェック
+  const removeDuplicateMessages = (messages) => {
+    const seen = new Set();
+    return messages.filter(message => {
+      const key = `${message.id}-${message.text}-${message.isUser}`;
+      if (seen.has(key)) {
+        console.warn('🔄 Duplicate message removed:', message);
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
   };
 
-  // LocalStorageからメッセージを読み込み
+  // メッセージをLocalStorageに保存
+  const saveMessages = (messagesToSave) => {
+    const deduplicated = removeDuplicateMessages(messagesToSave);
+    localStorage.setItem('chat_messages', JSON.stringify(deduplicated));
+    setMessages(deduplicated);
+  };
+
+  // LocalStorageからメッセージを読み込み（初回のみ）
   useEffect(() => {
+    if (isInitialized) return;
+
     const savedMessages = localStorage.getItem('chat_messages');
     if (savedMessages) {
       try {
         const parsed = JSON.parse(savedMessages);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed);
+          console.log('📨 Loading saved messages:', parsed.length);
+          const cleanMessages = removeDuplicateMessages(parsed);
+          setMessages(cleanMessages);
+        } else {
+          // 保存されたデータが空の場合はデフォルトメッセージ
+          setMessages([{
+            id: 1,
+            text: "こんにちは！AI日記アプリへようこそ。今日はどんな一日でしたか？",
+            isUser: false,
+            timestamp: new Date().toISOString()
+          }]);
         }
       } catch (error) {
         console.error('Error loading messages:', error);
+        // エラーの場合もデフォルトメッセージ
+        setMessages([{
+          id: 1,
+          text: "こんにちは！AI日記アプリへようこそ。今日はどんな一日でしたか？",
+          isUser: false,
+          timestamp: new Date().toISOString()
+        }]);
       }
+    } else {
+      // LocalStorageにデータが無い場合
+      setMessages([{
+        id: 1,
+        text: "こんにちは！AI日記アプリへようこそ。今日はどんな一日でしたか？",
+        isUser: false,
+        timestamp: new Date().toISOString()
+      }]);
     }
-  }, []);
+
+    setIsInitialized(true);
+  }, [isInitialized]);
 
   // メッセージリストを最下部にスクロール
   const scrollToBottom = () => {
@@ -149,12 +187,15 @@ const ChatContainer = () => {
   const handleSendMessage = async (messageText) => {
     if (!messageText.trim()) return;
 
+    const timestamp = new Date().toISOString();
+    const baseId = Date.now();
+
     // ユーザーメッセージを追加
     const userMessage = {
-      id: Date.now(),
+      id: `user-${baseId}`,
       text: messageText,
       isUser: true,
-      timestamp: new Date().toISOString()
+      timestamp: timestamp
     };
 
     const newMessagesWithUser = [...messages, userMessage];
@@ -189,7 +230,7 @@ const ChatContainer = () => {
       
       // AIレスポンスを追加
       const aiMessage = {
-        id: Date.now() + 1,
+        id: `ai-${baseId}`,
         text: data.response || "すみません、応答を生成できませんでした。",
         isUser: false,
         timestamp: new Date().toISOString()
@@ -223,7 +264,7 @@ const ChatContainer = () => {
       
       // フォールバック応答
       const fallbackMessage = {
-        id: Date.now() + 1,
+        id: `error-${baseId}`,
         text: errorMessage,
         isUser: false,
         timestamp: new Date().toISOString()
